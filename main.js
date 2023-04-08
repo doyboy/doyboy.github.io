@@ -61,49 +61,6 @@ function fetchImages(url) {
         .then((data) => {
             showImage(data);
             sidebarFunctionality(data);
-            // console.log(data);
-            // const testElement = document.createElement('a');
-            // const sourceUrl = `https://e621.net/posts/${data.posts[0].id}`;
-            // testElement.href = sourceUrl;
-            // testElement.innerHTML = `Source: ${sourceUrl}`;
-            // gallery.appendChild(testElement);
-            // const fileUrl = data.posts[0].file.url;
-            // const arr = fileUrl.split(".");
-            // if (arr[arr.length - 1] === "webm") {
-            //     console.log("this is a video");
-            //     const vid = document.createElement('video');
-            //     vid.src = fileUrl;
-            //     vid.controls = true;
-            //     vid.autoplay = true;
-            //     vid.muted = true;
-            //     vid.loop = true;
-            //     gallery.appendChild(vid);
-            // } else {
-            //     const img = document.createElement('img');
-            //     img.src = data.posts[0].file.url;
-            //     gallery.appendChild(img);
-            // }
-            // const previewImg = document.createElement('img');
-            // previewImg.src = data.posts[0].preview.url;
-            // sidebar.appendChild(previewImg);
-            // sidebarArray.push(previewImg);
-            // sidebarArray[sidebarArray.length - 1].addEventListener("click", (e) => {
-            //     gallery.innerHTML = '';
-            //     const img = document.createElement('img');
-            //     img.src = data.posts[0].file.url;
-            //     gallery.appendChild(img);
-            //     // console.log(e.target);
-            // });
         })
         .catch((error) => console.log(error));
 }
-
-// fetch(API_URL)
-//     .then((response) => response.json())
-//     .then((data) => {
-//         // console.log(data);
-//         const img = document.createElement('img');
-//         img.src = data.posts[0].preview.url;
-//         gallery.appendChild(img);
-//     })
-//     .catch((error) => console.log(error));
