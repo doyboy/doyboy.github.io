@@ -1,5 +1,3 @@
-const API_URL = `https://e621.net/posts.json?limit=1&tags=score%3A%3E1000+order%3Arandom+-female+-feral+-intersex`;
-
 const searchForm = document.querySelector('.search-form');
 const searchInput = document.querySelector('#search-input');
 const gallery = document.querySelector('.gallery');
