@@ -9,7 +9,8 @@ searchForm.addEventListener('submit', (event) => {
     const searchTerm = searchInput.value;
     let newSearchTerm = searchTerm.replace(/:\s*/g, "%3A");
     newSearchTerm = newSearchTerm.replace(/ /g, "+");
-    const searchUrl = `https://e621.net/posts.json?limit=1&tags=-cub+-loli+-shota+-young+-female+-feral+-intersex+-diaper+-scat+-watersports+-urine+-feces+-gore+${newSearchTerm}`;
+    const searchUrl = `https://e621.net/posts.json?limit=1&tags=-cub+-loli+-shota+-young+-female+-feral+-intersex+-diaper+-scat+-watersports+-urine+-feces+-gore+-syuro+-plushie+-kiske_7key+-loreking+-scruffythedeer+${newSearchTerm}`;
+    console.log(`searchUrl = ${searchUrl}`);
     fetchImages(searchUrl);
 });
 
