@@ -55,6 +55,7 @@ a {
 
 .search-form {
     display: flex;
+    justify-content: left;
     background-color: lightpink;
     width: 100%;
 }
