@@ -26,14 +26,14 @@ function showImage(data) {
     sourceUrlContainer.target = "_blank";
     sourceUrlContainer.innerHTML = `Source: ${sourceUrl}`;
     gallery.appendChild(sourceUrlContainer);
-    const fileUrl = data.posts[0].sample.alternates.original.urls[1];
-    const arr = fileUrl.split(".");
+    const fileUrl = data.posts[0].file.url;
     const fileExt = data.posts[0].file.ext;
     if (fileExt === "webm") {
         console.log("this is a video");
         console.log(`fileUrl = ${fileUrl}`);
+        const newFileUrl = data.posts[0].sample.alternates.original.urls[1]
         const vid = document.createElement('video');
-        vid.src = fileUrl;
+        vid.src = newFileUrl;
         vid.controls = true;
         vid.autoplay = true;
         vid.muted = true;
