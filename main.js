@@ -9,10 +9,8 @@ const sidebarArray = [];
 searchForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const searchTerm = searchInput.value;
-    console.log(`search term before change: ${searchTerm}`);
     let newSearchTerm = searchTerm.replace(/:\s*/g, "%3A");
     newSearchTerm = newSearchTerm.replace(/ /g, "+");
-    console.log(`search term after change: ${newSearchTerm}`);
     const searchUrl = `https://e621.net/posts.json?limit=1&tags=-cub+-loli+-shota+-young+-female+-feral+-intersex+-diaper+-scat+-watersports+-urine+-feces+-gore+${newSearchTerm}`;
     fetchImages(searchUrl);
 });
@@ -30,8 +28,8 @@ function showImage(data) {
     const fileExt = data.posts[0].file.ext;
     if (fileExt === "webm") {
         console.log("this is a video");
-        console.log(`fileUrl = ${fileUrl}`);
         const newFileUrl = data.posts[0].sample.alternates.original.urls[1]
+        console.log(`fileUrl = ${newFileUrl}`);
         const vid = document.createElement('video');
         vid.src = newFileUrl;
         vid.controls = true;
@@ -44,16 +42,6 @@ function showImage(data) {
         img.src = data.posts[0].file.url;
         gallery.appendChild(img);
     }
-}
-
-function getSourceVid(id) {
-    let apiUrl = `https://e621.net/posts/${id}.json`;
-    fetch(apiUrl)
-        .then((response) => response.json())
-        .then((data) => {
-            console.log(data);
-        })
-        .catch((error) => console.log(error));
 }
 
 function sidebarFunctionality(data) {
