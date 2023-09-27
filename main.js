@@ -26,10 +26,15 @@ function showImage(data) {
     sourceUrlContainer.target = "_blank";
     sourceUrlContainer.innerHTML = `Source: ${sourceUrl}`;
     gallery.appendChild(sourceUrlContainer);
-    const fileUrl = data.posts[0].file.url;
+    const fileUrl = data.posts[0].sample.alternates.original.urls[1];
     const arr = fileUrl.split(".");
-    if (arr[arr.length - 1] === "webm") {
+    const fileExt = data.posts[0].file.ext;
+    if (fileExt === "webm") {
         console.log("this is a video");
+        // postId = data.posts[0].id;
+        // getSourceVid(postId);
+        console.log(`fileUrl = ${fileUrl}`);
+        // fileUrl = data.posts[0].sample.alternates.original.urls[1];
         const vid = document.createElement('video');
         vid.src = fileUrl;
         vid.controls = true;
@@ -42,6 +47,16 @@ function showImage(data) {
         img.src = data.posts[0].file.url;
         gallery.appendChild(img);
     }
+}
+
+function getSourceVid(id) {
+    let apiUrl = `https://e621.net/posts/${id}.json`;
+    fetch(apiUrl)
+        .then((response) => response.json())
+        .then((data) => {
+            console.log(data);
+        })
+        .catch((error) => console.log(error));
 }
 
 function sidebarFunctionality(data) {
