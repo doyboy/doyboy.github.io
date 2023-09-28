@@ -1,67 +1,74 @@
+body,
+html {
+    height: 100%;
+    margin: 0px;
+}
+
 .all {
     display: flex;
-    flex-wrap: wrap;
     flex-direction: row;
-    object-fit: cover;
-    height: 95vh;
+    background-color: lightgray;
+    height: 100%;
 }
 
 .main {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
-    object-fit: cover;
-    background-color: lavender;
-    height: 100%;
     width: 100%;
-    max-height: 78vh;
+    flex-direction: column;
+    align-items: center;
 }
 
 .sidebar {
     display: flex;
     flex-direction: column;
     width: 10%;
-    background-color: lightcyan;
-    overflow-y: scroll;
-}
-
-.sidebar img {
-    width: 100%;
-    margin-bottom: 20%;
-}
-
-a {
-    text-align: center;
-}
-
-.gallery {
-    display: flex;
-    flex-wrap: wrap;;
-    flex-direction: column;
-    background-color: lightgrey;
-    width: 100%;
-}
-
-.gallery img {
-    max-width: 100%;
-    max-height: 74vh;
-    margin: auto;
-}
-
-.gallery video {
-    max-width: 100%;
-    max-height: 74vh;
-    margin: auto;
 }
 
 .search-form {
     display: flex;
-    justify-content: left;
-    background-color: lightpink;
-    width: 100%;
+    flex-direction: column;
+    background-color: lightcoral;
+    min-height: 10%;
+    height: 20%;
 }
 
-button {
-    height: 100px;
-    width: 100px;
+#searchButton {
+    width: 100%;
+    height: 100%;
+}
+
+.sidebarGallery {
+    display: flex;
+    flex-direction: column;
+    background-color: lightblue;
+    overflow-y: scroll;
+    height: 80%;
+}
+
+.sidebar img {
+    width: 100%;
+    margin-top: 5%;
+    margin-bottom: 5%;
+}
+
+.mainGallery {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: lightpink;
+    height: 100%;
+}
+
+.mainGallery a {
+    height: 5%;
+    display: flex;
+    align-items: center;
+}
+
+.mainGallery img {
+    height: 95%;
+}
+
+.mainGallery video {
+    height: 95%;
 }

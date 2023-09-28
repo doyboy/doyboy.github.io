@@ -8,14 +8,16 @@
 
 <body>
     <div class="all">
-        <form class="search-form">
-            <button type="submit">Search</button>
-            <label for="search-input">Search for photos:</label>
-            <input type="text" id="search-input" />
-        </form>
+        <div class="sidebar">
+            <form class="search-form">
+                <label for="search-input"></label>
+                <input type="text" id="search-input" />
+                <button type="submit" id="searchButton">Search</button>
+            </form>
+            <div class="sidebarGallery"></div>
+        </div>
         <div class="main">
-            <div class="sidebar"></div>
-            <div class="gallery"></div>
+            <div class="mainGallery"></div>
         </div>
     </div>
 

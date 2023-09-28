@@ -1,8 +1,8 @@
 const searchForm = document.querySelector('.search-form');
 const searchInput = document.querySelector('#search-input');
-const gallery = document.querySelector('.gallery');
-const sidebar = document.querySelector('.sidebar');
-const sidebarArray = [];
+const mainGallery = document.querySelector('.mainGallery');
+const sidebarGallery = document.querySelector('.sidebarGallery');
+const sidebarGalleryArray = [];
 
 searchForm.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -15,14 +15,14 @@ searchForm.addEventListener('submit', (event) => {
 });
 
 function showImage(data) {
-    gallery.innerHTML = '';
+    mainGallery.innerHTML = '';
     console.log(data);
     const sourceUrlContainer = document.createElement('a');
     const sourceUrl = `https://e621.net/posts/${data.posts[0].id}`;
     sourceUrlContainer.href = sourceUrl;
     sourceUrlContainer.target = "_blank";
     sourceUrlContainer.innerHTML = `Source: ${sourceUrl}`;
-    gallery.appendChild(sourceUrlContainer);
+    mainGallery.appendChild(sourceUrlContainer);
     const fileUrl = data.posts[0].file.url;
     const fileExt = data.posts[0].file.ext;
     if (fileExt === "webm") {
@@ -33,33 +33,32 @@ function showImage(data) {
         vid.src = newFileUrl;
         vid.controls = true;
         vid.autoplay = true;
-        vid.muted = true;
         vid.loop = true;
-        gallery.appendChild(vid);
+        mainGallery.appendChild(vid);
     } else {
         const img = document.createElement('img');
-        img.src = data.posts[0].file.url;
-        gallery.appendChild(img);
+        img.src = fileUrl;
+        mainGallery.appendChild(img);
     }
 }
 
-function sidebarFunctionality(data) {
+function sidebarGalleryFunctionality(data) {
     const previewImg = document.createElement('img');
     previewImg.src = data.posts[0].preview.url;
-    sidebar.appendChild(previewImg);
-    sidebarArray.push(previewImg);
-    sidebarArray[sidebarArray.length - 1].addEventListener("click", () => {
+    sidebarGallery.appendChild(previewImg);
+    sidebarGalleryArray.push(previewImg);
+    sidebarGalleryArray[sidebarGalleryArray.length - 1].addEventListener("click", () => {
         showImage(data);
     });
 }
 
 function fetchImages(url) {
-    gallery.innerHTML = '';
+    mainGallery.innerHTML = '';
     fetch(url)
         .then((response) => response.json())
         .then((data) => {
             showImage(data);
-            sidebarFunctionality(data);
+            sidebarGalleryFunctionality(data);
         })
         .catch((error) => console.log(error));
 }
