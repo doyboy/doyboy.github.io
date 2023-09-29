@@ -37,12 +37,38 @@ html {
     height: 100%;
 }
 
+.filters {
+    display: flex;
+    flex-direction: column;
+    background-color: lightgreen;
+    height: 5%;
+}
+
+#filterCollapsible {
+    height: 50px;
+}
+
+.filterOptions {
+    display: none;
+    overflow: hidden;
+    overflow-y: overlay;
+    height: 100%;
+}
+
+input {
+    width: 95%;
+}
+
+.checkbox {
+    width: 10%;
+}
+
 .sidebarGallery {
     display: flex;
     flex-direction: column;
     background-color: lightblue;
-    overflow-y: scroll;
-    height: 80%;
+    overflow-y: overlay;
+    height: 75%;
 }
 
 .sidebar img {

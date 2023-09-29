@@ -14,6 +14,15 @@
                 <input type="text" id="search-input" />
                 <button type="submit" id="searchButton">Search</button>
             </form>
+            <div class="filters">
+                <button type="button" id="filterCollapsible">Filters</button>
+                <div class="filterOptions">
+                    <p id="scoreLabel">Score: 500</p>
+                    <input type="range" min="50" max="1000" value="500" class="slider" id="scoreSlider">
+                    <span id="randomLabel">Random:</span>
+                    <input type="checkbox" class="checkbox" id="randomCheckbox">
+                </div>
+            </div>
             <div class="sidebarGallery"></div>
         </div>
         <div class="main">

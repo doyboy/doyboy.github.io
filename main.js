@@ -4,19 +4,46 @@ const mainGallery = document.querySelector('.mainGallery');
 const sidebarGallery = document.querySelector('.sidebarGallery');
 const sidebarGalleryArray = [];
 
+const filterCollapsible = document.querySelector('#filterCollapsible');
+const filterOptions = document.querySelector('.filterOptions');
+const filterContainer = document.querySelector('.filters');
+
+const scoreSlider = document.querySelector('#scoreSlider');
+const scoreLabel = document.querySelector('#scoreLabel');
+
+const randomLabel = document.querySelector('#randomLabel');
+const randomCheckbox = document.querySelector('#randomCheckbox');
+
 searchForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const searchTerm = searchInput.value;
     let newSearchTerm = searchTerm.replace(/:\s*/g, "%3A");
+    newSearchTerm = newSearchTerm.concat(`+score:>${scoreSlider.value}`);
+    if (randomCheckbox.checked) newSearchTerm = newSearchTerm.concat(`+order:random`)
     newSearchTerm = newSearchTerm.replace(/ /g, "+");
     const searchUrl = `https://e621.net/posts.json?limit=1&tags=-cub+-loli+-shota+-young+-female+-feral+-intersex+-diaper+-scat+-watersports+-urine+-feces+-gore+-syuro+-plushie+-kiske_7key+-loreking+-scruffythedeer+${newSearchTerm}`;
     console.log(`searchUrl = ${searchUrl}`);
     fetchImages(searchUrl);
 });
 
+scoreSlider.addEventListener('input', () => {
+    scoreLabel.innerHTML = `Score: ${scoreSlider.value}`;
+});
+
+filterCollapsible.addEventListener('click', () => {
+    if (filterOptions.style.display === "block") {
+        filterOptions.style.display = "none";
+        sidebarGallery.style.height = "75%";
+        filterContainer.style.height = "5%";
+    } else {
+        filterOptions.style.display = "block";
+        sidebarGallery.style.height = "60%";
+        filterContainer.style.height = "20%";
+    }
+});
+
 function showImage(data) {
     mainGallery.innerHTML = '';
-    console.log(data);
     const sourceUrlContainer = document.createElement('a');
     const sourceUrl = `https://e621.net/posts/${data.posts[0].id}`;
     sourceUrlContainer.href = sourceUrl;
@@ -26,7 +53,6 @@ function showImage(data) {
     const fileUrl = data.posts[0].file.url;
     const fileExt = data.posts[0].file.ext;
     if (fileExt === "webm") {
-        console.log("this is a video");
         const newFileUrl = data.posts[0].sample.alternates.original.urls[1]
         console.log(`fileUrl = ${newFileUrl}`);
         const vid = document.createElement('video');
