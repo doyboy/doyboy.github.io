@@ -14,22 +14,21 @@ const scoreLabel = document.querySelector('#scoreLabel');
 const randomLabel = document.querySelector('#randomLabel');
 const randomCheckbox = document.querySelector('#randomCheckbox');
 
-const consumer_key = "108962-e892860bef60c3b7579c4c1";
-const access_token = "d814badc-31ec-31f8-25af-09dd52";
+const access_token = "e9b35900-8edc-440d-b9ae-382d67c8a556";
 
-const pocketUrl = "https://getpocket.com/v3/get";
+let maxPageNum, randomPageNum, randomIndex;
 
-const params = {
-    consumer_key: consumer_key,
-    access_token: access_token,
-    detailType: "simple"
-};
+// const params = {
+//     consumer_key: consumer_key,
+//     access_token: access_token,
+//     detailType: "simple"
+// };
 
 searchForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const searchTerm = searchInput.value;
-    if (searchTerm == "pocket") {
-        fetchPocket();
+    if (searchTerm == "raindrop" || searchTerm == "random" || searchTerm == "pocket") {
+        fetchRaindrop();
     }
     else {
         let newSearchTerm = searchTerm.replace(/:\s*/g, "%3A");
@@ -90,6 +89,7 @@ function sidebarGalleryFunctionality(data) {
     sidebarGallery.appendChild(previewImg);
     sidebarGalleryArray.push(previewImg);
     sidebarGalleryArray[sidebarGalleryArray.length - 1].addEventListener("click", () => {
+        console.log('data after clicking', data);
         showImage(data);
     });
 }
@@ -99,51 +99,176 @@ function fetchImages(url) {
     fetch(url)
         .then((response) => response.json())
         .then((data) => {
+            console.log('e621 data:', data);
             showImage(data);
             sidebarGalleryFunctionality(data);
         })
         .catch((error) => console.log(error));
 }
 
-const fetchData = async () => {
-    try {
-        const response = await fetch(pocketUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(params)
-        });
+// const fetchData = async () => {
+//     try {
+//         const response = await fetch(pocketUrl, {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify(params)
+//         });
 
-        if (!response.ok) {
-            throw new Error('Failed to fetch data');
-        }
+//         if (!response.ok) {
+//             throw new Error('Failed to fetch data');
+//         }
 
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error fetching data:', error);
-    }
-};
+//         const data = await response.json();
+//         return data;
+//     } catch (error) {
+//         console.error('Error fetching data:', error);
+//     }
+// };
 
-// Function to get random bookmark
-const getRandomBookmark = async () => {
-    const data = await fetchData();
-    if (data && data.list) {
-        const bookmarkIds = Object.keys(data.list);
-        const randomBookmarkId = bookmarkIds[Math.floor(Math.random() * bookmarkIds.length)];
-        return data.list[randomBookmarkId];
-    } else {
-        console.log("No bookmarks found.");
-    }
-};
+// // Function to get random bookmark
+// const getRandomBookmark = async () => {
+//     const data = await fetchData();
+//     if (data && data.list) {
+//         const bookmarkIds = Object.keys(data.list);
+//         const randomBookmarkId = bookmarkIds[Math.floor(Math.random() * bookmarkIds.length)];
+//         return data.list[randomBookmarkId];
+//     } else {
+//         console.log("No bookmarks found.");
+//     }
+// };
 
-function fetchPocket() {
-    console.log("fetching pocket");
+// function fetchPocket() {
+//     console.log("fetching pocket");
+//     mainGallery.innerHTML = '';
+
+//     // getRandomBookmark().then(bookmark => {
+//     //     console.log(bookmark);
+//     // });
+//     window.open('https://getpocket.com/random', '_blank');
+// }
+
+function fetchRaindrop() {
     mainGallery.innerHTML = '';
+    const allBookmarksUrl = `https://api.raindrop.io/rest/v1/raindrops/0?access_token=${access_token}`
+    console.log("starter url", allBookmarksUrl);
+    fetch(allBookmarksUrl)
+        .then((response) => response.json())
+        .then((data) => {
+            maxPageNum = Math.floor(data.count / 25);
+            randomPageNum = getRandomInt(0, maxPageNum);
 
-    // getRandomBookmark().then(bookmark => {
-    //     console.log(bookmark);
-    // });
-    window.open('https://getpocket.com/random', '_blank');
+            const newBookmarksUrl = `https://api.raindrop.io/rest/v1/raindrops/0?access_token=${access_token}&page=${randomPageNum}`;
+            console.log('new url', newBookmarksUrl);
+
+            fetch(newBookmarksUrl)
+                .then((response) => response.json())
+                .then((data) => {
+                    randomIndex = getRandomInt(0, data.items.length);
+                    let randomFetch = data.items[randomIndex];
+                    let parsedLink = randomFetch.link.split('.');
+                    parsedLink = parsedLink[0].split('/');
+                    parsedLink = parsedLink[2];
+                    showRandomImage(randomFetch, parsedLink);
+                    // sidebarRandomGalleryFunctionality(data, parsedLink);
+                })
+                .catch((error) => console.log(error));
+        })
+        .catch((error) => console.log(error));
+}
+
+function showRandomImage(data, dataType) {
+    mainGallery.innerHTML = '';
+    const sourceUrlContainer = document.createElement('a');
+    if (dataType == "e621") {
+        let postId = data.link.split('/');
+        postId = postId[postId.length - 1].split('?')[0];
+        postId = parseInt(postId) + 1;
+
+        let searchUrl = `https://e621.net/posts.json?limit=1&page=b${postId}`;
+        console.log('searchUrl', searchUrl);
+        fetch(searchUrl)
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('e621 data:', data);
+                showImage(data);
+                sidebarGalleryFunctionality(data);
+            })
+            .catch((error) => console.log(error));
+
+        sourceUrlContainer.href = sourceUrl;
+        sourceUrlContainer.target = "_blank";
+        sourceUrlContainer.innerHTML = `Source: ${sourceUrl}`;
+        mainGallery.appendChild(sourceUrlContainer);
+        const fileUrl = data.cover;
+        const fileExt = data.cover.split('.');
+        console.log('file ext', fileExt);
+        if (fileExt === "webm") {
+            const newFileUrl = data.posts[0].sample.alternates.original.urls[1]
+            console.log(`fileUrl = ${newFileUrl}`);
+            const vid = document.createElement('video');
+            vid.src = newFileUrl;
+            vid.controls = true;
+            vid.autoplay = true;
+            vid.loop = true;
+            mainGallery.appendChild(vid);
+        } else {
+            const img = document.createElement('img');
+            img.src = fileUrl;
+            mainGallery.appendChild(img);
+        }
+    }
+    else if (dataType == "api") {
+        raindropMainFunctionality(data, sourceUrlContainer);
+        sidebarGalleryArray[sidebarGalleryArray.length - 1].addEventListener("click", () => {
+            raindropSidebarFunctionality(data, sourceUrlContainer);
+        });
+    }
+    else {
+        console.log('wrong data type', data);
+    }
+}
+
+function raindropMainFunctionality(data, sourceUrlContainer) {
+    let sourceUrl = data.link;
+
+    sourceUrlContainer.href = sourceUrl;
+    sourceUrlContainer.target = "_blank";
+    sourceUrlContainer.innerHTML = `Source: ${sourceUrl}`;
+    mainGallery.appendChild(sourceUrlContainer);
+
+    const fileUrl = data.cover;
+    const img = document.createElement('img');
+    img.src = fileUrl;
+    mainGallery.appendChild(img);
+
+    const previewImg = document.createElement('img');
+    previewImg.src = data.cover;
+    sidebarGallery.appendChild(previewImg);
+    sidebarGalleryArray.push(previewImg);
+}
+
+function raindropSidebarFunctionality(data, sourceUrlContainer) {
+    mainGallery.innerHTML = '';
+    let sourceUrl = data.link;
+
+    sourceUrlContainer.href = sourceUrl;
+    sourceUrlContainer.target = "_blank";
+    sourceUrlContainer.innerHTML = `Source: ${sourceUrl}`;
+    mainGallery.appendChild(sourceUrlContainer);
+
+    const fileUrl = data.cover;
+    const img = document.createElement('img');
+    img.src = fileUrl;
+    mainGallery.appendChild(img);
+
+    const previewImg = document.createElement('img');
+    previewImg.src = data.cover;
+}
+
+function getRandomInt(min, max) {
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
 }
