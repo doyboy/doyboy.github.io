@@ -17,13 +17,18 @@ const randomCheckbox = document.querySelector('#randomCheckbox');
 searchForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const searchTerm = searchInput.value;
-    let newSearchTerm = searchTerm.replace(/:\s*/g, "%3A");
-    newSearchTerm = newSearchTerm.concat(`+score:>${scoreSlider.value}`);
-    if (randomCheckbox.checked) newSearchTerm = newSearchTerm.concat(`+order:random`)
-    newSearchTerm = newSearchTerm.replace(/ /g, "+");
-    const searchUrl = `https://e621.net/posts.json?limit=1&tags=-cub+-loli+-shota+-young+-female+-feral+-intersex+-diaper+-scat+-watersports+-urine+-feces+-gore+-syuro+-plushie+-kiske_7key+-loreking+-scruffythedeer+${newSearchTerm}`;
-    console.log(`searchUrl = ${searchUrl}`);
-    fetchImages(searchUrl);
+    if (searchTerm == "pocket") {
+        fetchPocket();
+    }
+    else {
+        let newSearchTerm = searchTerm.replace(/:\s*/g, "%3A");
+        newSearchTerm = newSearchTerm.concat(`+score:>${scoreSlider.value}`);
+        if (randomCheckbox.checked) newSearchTerm = newSearchTerm.concat(`+order:random`)
+        newSearchTerm = newSearchTerm.replace(/ /g, "+");
+        const searchUrl = `https://e621.net/posts.json?limit=1&tags=-cub+-loli+-shota+-young+-female+-feral+-intersex+-diaper+-scat+-watersports+-urine+-feces+-gore+-syuro+-plushie+-kiske_7key+-loreking+-scruffythedeer+${newSearchTerm}`;
+        console.log(`searchUrl = ${searchUrl}`);
+        fetchImages(searchUrl);
+    }
 });
 
 scoreSlider.addEventListener('input', () => {
@@ -87,4 +92,11 @@ function fetchImages(url) {
             sidebarGalleryFunctionality(data);
         })
         .catch((error) => console.log(error));
+}
+
+function fetchPocket() {
+    console.log("fetching pocket");
+    mainGallery.innerHTML = '';
+
+    window.open('https://getpocket.com/random', '_blank');
 }
