@@ -14,6 +14,17 @@ const scoreLabel = document.querySelector('#scoreLabel');
 const randomLabel = document.querySelector('#randomLabel');
 const randomCheckbox = document.querySelector('#randomCheckbox');
 
+const consumer_key = "108962-e892860bef60c3b7579c4c1";
+const access_token = "d814badc-31ec-31f8-25af-09dd52";
+
+const pocketUrl = "https://getpocket.com/v3/get";
+
+const params = {
+    consumer_key: consumer_key,
+    access_token: access_token,
+    detailType: "simple"
+};
+
 searchForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const searchTerm = searchInput.value;
@@ -94,9 +105,45 @@ function fetchImages(url) {
         .catch((error) => console.log(error));
 }
 
+const fetchData = async () => {
+    try {
+        const response = await fetch(pocketUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(params)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch data');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+};
+
+// Function to get random bookmark
+const getRandomBookmark = async () => {
+    const data = await fetchData();
+    if (data && data.list) {
+        const bookmarkIds = Object.keys(data.list);
+        const randomBookmarkId = bookmarkIds[Math.floor(Math.random() * bookmarkIds.length)];
+        return data.list[randomBookmarkId];
+    } else {
+        console.log("No bookmarks found.");
+    }
+};
+
 function fetchPocket() {
     console.log("fetching pocket");
     mainGallery.innerHTML = '';
 
+    // getRandomBookmark().then(bookmark => {
+    //     console.log(bookmark);
+    // });
     window.open('https://getpocket.com/random', '_blank');
 }
