@@ -14,6 +14,9 @@ const scoreLabel = document.querySelector('#scoreLabel');
 const randomLabel = document.querySelector('#randomLabel');
 const randomCheckbox = document.querySelector('#randomCheckbox');
 
+const draggables = [];
+let draggableIndex = 0, zIndex = 1, isMouseDown = false, isXPressed = false;
+
 const access_token = "e9b35900-8edc-440d-b9ae-382d67c8a556";
 
 let maxPageNum, randomPageNum, randomIndex;
@@ -52,29 +55,16 @@ filterCollapsible.addEventListener('click', () => {
 });
 
 function showImage(data) {
-    mainGallery.innerHTML = '';
+    // mainGallery.innerHTML = '';
     const sourceUrlContainer = document.createElement('a');
     const sourceUrl = `https://e621.net/posts/${data.posts[0].id}`;
     sourceUrlContainer.href = sourceUrl;
     sourceUrlContainer.target = "_blank";
     sourceUrlContainer.innerHTML = `Source: ${sourceUrl}`;
-    mainGallery.appendChild(sourceUrlContainer);
+    // mainGallery.appendChild(sourceUrlContainer);
     const fileUrl = data.posts[0].file.url;
     const fileExt = data.posts[0].file.ext;
-    if (fileExt === "webm") {
-        const newFileUrl = data.posts[0].sample.alternates.original.urls[1]
-        console.log(`fileUrl = ${newFileUrl}`);
-        const vid = document.createElement('video');
-        vid.src = newFileUrl;
-        vid.controls = true;
-        vid.autoplay = true;
-        vid.loop = true;
-        mainGallery.appendChild(vid);
-    } else {
-        const img = document.createElement('img');
-        img.src = fileUrl;
-        mainGallery.appendChild(img);
-    }
+    createDraggable(fileUrl, fileExt, data);
 }
 
 function sidebarGalleryFunctionality(data) {
@@ -89,7 +79,7 @@ function sidebarGalleryFunctionality(data) {
 }
 
 function fetchImages(url) {
-    mainGallery.innerHTML = '';
+    // mainGallery.innerHTML = '';
     fetch(url)
         .then((response) => response.json())
         .then((data) => {
@@ -101,7 +91,7 @@ function fetchImages(url) {
 }
 
 function fetchRaindrop() {
-    mainGallery.innerHTML = '';
+    // mainGallery.innerHTML = '';
     const allBookmarksUrl = `https://api.raindrop.io/rest/v1/raindrops/0?access_token=${access_token}`
     console.log("starter url", allBookmarksUrl);
     fetch(allBookmarksUrl)
@@ -129,7 +119,7 @@ function fetchRaindrop() {
 }
 
 function showRandomImage(data, dataType) {
-    mainGallery.innerHTML = '';
+    // mainGallery.innerHTML = '';
     const sourceUrlContainer = document.createElement('a');
     if (dataType == "e621") {
         let postId = data.link.split('/');
@@ -164,12 +154,11 @@ function raindropMainFunctionality(data, sourceUrlContainer) {
     sourceUrlContainer.href = sourceUrl;
     sourceUrlContainer.target = "_blank";
     sourceUrlContainer.innerHTML = `Source: ${sourceUrl}`;
-    mainGallery.appendChild(sourceUrlContainer);
+    // mainGallery.appendChild(sourceUrlContainer);
 
     const fileUrl = data.cover;
-    const img = document.createElement('img');
-    img.src = fileUrl;
-    mainGallery.appendChild(img);
+    const fileExt = "";
+    createDraggable(fileUrl, fileExt, data);
 
     const previewImg = document.createElement('img');
     previewImg.src = data.cover;
@@ -178,18 +167,17 @@ function raindropMainFunctionality(data, sourceUrlContainer) {
 }
 
 function raindropSidebarFunctionality(data, sourceUrlContainer) {
-    mainGallery.innerHTML = '';
+    // mainGallery.innerHTML = '';
     let sourceUrl = data.link;
 
     sourceUrlContainer.href = sourceUrl;
     sourceUrlContainer.target = "_blank";
     sourceUrlContainer.innerHTML = `Source: ${sourceUrl}`;
-    mainGallery.appendChild(sourceUrlContainer);
+    // mainGallery.appendChild(sourceUrlContainer);
 
     const fileUrl = data.cover;
-    const img = document.createElement('img');
-    img.src = fileUrl;
-    mainGallery.appendChild(img);
+    const fileExt = "";
+    createDraggable(fileUrl, fileExt, data);
 
     const previewImg = document.createElement('img');
     previewImg.src = data.cover;
@@ -199,4 +187,130 @@ function getRandomInt(min, max) {
     const minCeiled = Math.ceil(min);
     const maxFloored = Math.floor(max);
     return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+}
+
+function createDraggable(url, ext, data) {
+    if (ext == "webm") {
+        const newFileUrl = data.posts[0].sample.alternates.original.urls[1]
+        const vid = document.createElement('video');
+        vid.src = newFileUrl;
+        vid.controls = true;
+        vid.autoplay = true;
+        vid.loop = true;
+        vid.classList.add("drag");
+        vid.style.maxHeight = "100%";
+        vid.style.maxWidth = "40%";
+        mainGallery.appendChild(vid);
+        draggables.push(vid);
+        console.log('draggables array:', draggables);
+        dragElement(draggables[draggableIndex]);
+        draggableIndex += 1;
+    } else {
+        const img = document.createElement('img');
+        img.src = url;
+        img.classList.add("drag");
+        img.style.maxHeight = "100%";
+        img.style.maxWidth = "40%";
+        mainGallery.appendChild(img);
+        draggables.push(img);
+        console.log('draggables array:', draggables);
+        dragElement(draggables[draggableIndex]);
+        draggableIndex += 1;
+    }
+}
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "x") {
+        isXPressed = true;
+    }
+});
+
+document.addEventListener("keyup", (e) => {
+    if (e.key === "x") {
+        isXPressed = false;
+    }
+});
+
+function dragElement(elmnt) {
+    elmnt.addEventListener("mousedown", (e) => {
+        elmnt.style.zIndex = zIndex;
+        zIndex += 1;
+        if (zIndex > 997) {
+            draggables.forEach(e => {
+                e.style.zIndex = null;
+            });
+            zIndex = 1;
+        }
+        isMouseDown = true;
+        if (e.ctrlKey) {
+            console.log('pressing ctrl');
+            dragMouseDownCtrl(e);
+        } else {
+            dragMouseDown(e);
+        }
+        
+        if (isXPressed) elmnt.remove();
+    });
+
+    elmnt.addEventListener("mouseup", () => {
+        isMouseDown = false;
+    });
+
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+    function dragMouseDown(e) {
+        e = e || window;
+        e.preventDefault();
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // call a function whenever the cursor moves:
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        console.log('dragging');
+        e = e || window;
+        e.preventDefault();
+        // calculate the new cursor position:
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // set the element's new position:
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    function dragMouseDownCtrl(e) {
+        e = e || window;
+        e.preventDefault();
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // call a function whenever the cursor moves:
+        document.onmousemove = resizeElement;
+    }
+
+    function resizeElement(e) {
+        console.log('resizing');
+        e = e || window;
+        e.preventDefault();
+        // calculate the new cursor position:
+        pos1 = pos3 - e.clientX;
+        console.log('pos1', -pos1);
+        pos3 = e.clientX;
+
+        // set the element's new size:
+        let maxWidthNum = parseFloat(elmnt.style.maxWidth.split("%")[0]);
+        elmnt.style.maxWidth = (maxWidthNum - (pos1 / 10)) + "%";
+    }
+
+    function closeDragElement() {
+        // stop moving when mouse button is released:
+        document.onmouseup = null;
+        document.onmousemove = null;
+    }
 }

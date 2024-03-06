@@ -22,7 +22,6 @@ html {
     display: flex;
     flex-direction: column;
     width: 10%;
-    z-index: 999;
 }
 
 .search-form {
@@ -94,15 +93,12 @@ input {
     align-items: center;
 }
 
-.drag {
-    position: absolute;
-    border: 3px solid black;
-    /* max-width: 40%;
-    max-height: 40%; */
+.mainGallery img {
+    max-height: 95%;
+    max-width: 100%;
 }
 
-/* .resize {
-    height: 50px;
-    width: 50px;
-    background-color: red;
-} */
+.mainGallery video {
+    max-height: 95%;
+    max-width: 100%;
+}
