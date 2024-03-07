@@ -1,11 +1,12 @@
 const searchForm = document.querySelector('.search-form');
 const searchInput = document.querySelector('#search-input');
-const mainGallery = document.querySelector('.mainGallery');
+const main = document.querySelector('.main');
+const mainGallery = document.querySelector('#mainGallery');
+// const galleryContext = mainGallery.getContext('2d');
 const sidebar = document.querySelector('.sidebar');
 const sidebarGallery = document.querySelector('.sidebarGallery');
 const sidebarGalleryArray = [];
 const toggleSidebarButton = document.querySelector('#toggleSidebarButton');
-const resizeButton = document.querySelector('#resizeButton')
 
 const filterCollapsible = document.querySelector('#filterCollapsible');
 const filterOptions = document.querySelector('.filterOptions');
@@ -19,7 +20,7 @@ const randomCheckbox = document.querySelector('#randomCheckbox');
 
 const draggableDivs = [];
 const draggableMedia = [];
-let draggableIndex = 0, zIndex = 1, isMouseDown = false, isXPressed = false, isResizing = false;
+let draggableIndex = 0, zIndex = 1, isMouseDown = false, isXPressed = false;
 
 const access_token = "e9b35900-8edc-440d-b9ae-382d67c8a556";
 
@@ -31,11 +32,159 @@ const selectedElement = {
     mediaElmnt: ''
 };
 
-resizeButton.onclick = () => {
-    isResizing = !isResizing;
-    if (isResizing) resizeButton.style.background = 'darkgrey';
-    else resizeButton.style.background = null;
-};
+const stage = new Konva.Stage({
+    container: 'mainGallery',
+    width: window.innerWidth,
+    height: window.innerHeight,
+});
+
+const layer = new Konva.Layer();
+stage.add(layer);
+
+window.addEventListener("resize", (e) => {
+    stage.width(window.innerWidth);
+    stage.height(window.innerHeight);
+});
+
+function drawImage(imageObj, type) {
+
+    var img = new Konva.Image({
+        image: imageObj,
+        x: stage.width() / 4,
+        y: stage.height() / 4,
+        scaleX: 0.20,
+        scaleY: 0.20,
+        name: 'img',
+        draggable: true
+    });
+
+    console.log('imgobj', imageObj);
+
+    // if (type === 'video') {
+    // imageObj.addEventListener('loadedmetadata', function () {
+    //     console.log('loaded metadata');
+    img.width(imageObj.videoWidth);
+    img.height(imageObj.videoHeight);
+    // });
+    layer.add(img);
+    // }
+
+    var tr = new Konva.Transformer({
+        centeredScaling: true,
+        keepRatio: true,
+        enabledAnchors: [
+            'top-left',
+            'top-right',
+            'bottom-left',
+            'bottom-right',
+        ]
+    });
+    layer.add(tr);
+
+    var selectionRectangle = new Konva.Rect({
+        fill: 'rgba(0,0,255,0.5)',
+        visible: false,
+    });
+    layer.add(selectionRectangle);
+
+    var x1, y1, x2, y2;
+    var selecting = false;
+    stage.on('mousedown touchstart', (e) => {
+        // do nothing if we mousedown on any shape
+        if (e.target !== stage) {
+            return;
+        }
+        e.evt.preventDefault();
+        x1 = stage.getPointerPosition().x;
+        y1 = stage.getPointerPosition().y;
+        x2 = stage.getPointerPosition().x;
+        y2 = stage.getPointerPosition().y;
+
+        selectionRectangle.width(0);
+        selectionRectangle.height(0);
+        selecting = true;
+    });
+
+    stage.on('mousemove touchmove', (e) => {
+        // do nothing if we didn't start selection
+        if (!selecting) {
+            return;
+        }
+        e.evt.preventDefault();
+        x2 = stage.getPointerPosition().x;
+        y2 = stage.getPointerPosition().y;
+
+        selectionRectangle.setAttrs({
+            visible: true,
+            x: Math.min(x1, x2),
+            y: Math.min(y1, y2),
+            width: Math.abs(x2 - x1),
+            height: Math.abs(y2 - y1),
+        });
+    });
+
+    stage.on('mouseup touchend', (e) => {
+        // do nothing if we didn't start selection
+        selecting = false;
+        if (!selectionRectangle.visible()) {
+            return;
+        }
+        e.evt.preventDefault();
+        // update visibility in timeout, so we can check it in click event
+        selectionRectangle.visible(false);
+        var shapes = stage.find('.img');
+        var box = selectionRectangle.getClientRect();
+        var selected = shapes.filter((shape) =>
+            Konva.Util.haveIntersection(box, shape.getClientRect())
+        );
+        tr.nodes(selected);
+    });
+
+    // clicks should select/deselect shapes
+    stage.on('click tap', function (e) {
+        // if we are selecting with rect, do nothing
+        if (selectionRectangle.visible()) {
+            return;
+        }
+
+        // if click on empty area - remove all selections
+        if (e.target === stage) {
+            tr.nodes([]);
+            return;
+        }
+
+        // do nothing if clicked NOT on our rectangles
+        if (!e.target.hasName('img')) {
+            return;
+        }
+
+        // do we pressed shift or ctrl?
+        const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
+        const isSelected = tr.nodes().indexOf(e.target) >= 0;
+
+        if (!metaPressed && !isSelected) {
+            // if no key pressed and the node is not selected
+            // select just one
+            tr.nodes([e.target]);
+        } else if (metaPressed && isSelected) {
+            // if we pressed keys and node was selected
+            // we need to remove it from selection:
+            const nodes = tr.nodes().slice(); // use slice to have new copy of array
+            // remove node from array
+            nodes.splice(nodes.indexOf(e.target), 1);
+            tr.nodes(nodes);
+        } else if (metaPressed && !isSelected) {
+            // add the node into selection
+            const nodes = tr.nodes().concat([e.target]);
+            tr.nodes(nodes);
+        }
+    });
+}
+// var imageObj = new Image();
+// imageObj.onload = function () {
+//     drawImage(this);
+// };
+// imageObj.src = '/assets/darth-vader.jpg';
 
 searchForm.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -218,36 +367,62 @@ function getRandomInt(min, max) {
 
 function createDraggable(url, ext, data) {
     if (ext == "webm") {
-        const newFileUrl = data.posts[0].sample.alternates.original.urls[1]
-        const divWrapper = document.createElement('div');
-        const vid = document.createElement('video');
-        vid.src = newFileUrl;
-        vid.controls = true;
-        vid.controlsList = "nofullscreen";
-        vid.autoplay = true;
-        vid.loop = true;
-        divWrapper.classList.add("drag");
-        divWrapper.style.width = "40%";
-        divWrapper.style.zIndex = zIndex;
-        divWrapper.appendChild(vid);
-        draggableDivs.push(divWrapper);
-        draggableMedia.push(vid);
-        mainGallery.appendChild(divWrapper);
-        dragElement(draggableDivs[draggableIndex]);
-        draggableIndex += 1;
+        console.log('adding video');
+        const newFileUrl = data.posts[0].sample.alternates.original.urls[1];
+        const imageObj = document.createElement('video');
+        imageObj.src = newFileUrl;
+        imageObj.controls = true;
+        imageObj.autoplay = true;
+        console.log('before function');
+        imageObj.onloadedmetadata = function () {
+            console.log('running function');
+            drawImage(this, 'video');
+        };
+        // const newFileUrl = data.posts[0].sample.alternates.original.urls[1]
+        // const vid = new Image();
+        // vid.onload = () => {
+        //     galleryContext.drawImage(vid, 0, 0);
+        //     galleryContext.fillStyle = "rgba(0, 0, 0, 0)";
+        //     galleryContext.fillRect(200, 200, 1000, 1000);
+        // };
+        // vid.src = url;
+        // vid.src = newFileUrl;
+        // vid.controls = true;
+        // vid.controlsList = "nofullscreen";
+        // vid.autoplay = true;
+        // vid.loop = true;
+        // divWrapper.classList.add("drag");
+        // divWrapper.style.width = "40%";
+        // divWrapper.style.zIndex = zIndex;
+        // divWrapper.appendChild(vid);
+        // draggableDivs.push(divWrapper);
+        // draggableMedia.push(vid);
+        // mainGallery.appendChild(divWrapper);
+        // dragElement(draggableDivs[draggableIndex]);
+        // draggableIndex += 1;
     } else {
-        const divWrapper = document.createElement('div');
-        const img = document.createElement('img');
-        img.src = url;
-        divWrapper.classList.add("drag");
-        divWrapper.style.width = "40%";
-        divWrapper.style.zIndex = zIndex;
-        divWrapper.appendChild(img);
-        draggableDivs.push(divWrapper);
-        draggableMedia.push(img);
-        mainGallery.appendChild(divWrapper);
-        dragElement(draggableDivs[draggableIndex]);
-        draggableIndex += 1;
+        console.log('adding img');
+        const imageObj = document.createElement('img');
+        imageObj.src = url;
+        imageObj.onload = function () {
+            drawImage(this, 'img');
+        };
+        // const img = new Image();
+        // img.onload = () => {
+        //     galleryContext.drawImage(img, 0, 0);
+        //     galleryContext.fillStyle = "rgba(0, 0, 0, 0)";
+        //     galleryContext.fillRect(200, 200, 1000, 1000);
+        // };
+        // img.src = url;
+        // img.classList.add("drag");
+        // divWrapper.style.width = "40%";
+        // divWrapper.style.zIndex = zIndex;
+        // divWrapper.appendChild(img);
+        // draggableDivs.push(divWrapper);
+        // draggableMedia.push(img);
+        // mainGallery.appendChild(divWrapper);
+        // dragElement(draggableDivs[draggableIndex]);
+        // draggableIndex += 1;
     }
 }
 
@@ -264,7 +439,7 @@ function fitDivToMedia(divElmnt, mediaElmnt) {
 document.addEventListener("keydown", (e) => {
     if (e.key === "Delete") {
         delete draggableDivs[draggableDivs.indexOf(selectedElement.div)];
-        selectedElement.div.remove();
+        selectedElement.remove();
         console.log('draggableDivs after removing:', draggableDivs);
     } else if (e.ctrlKey && e.key === "c") {
         // console.log('copying image');
@@ -315,32 +490,7 @@ function dragElement(elmnt) {
             zIndex = 1;
         }
         isMouseDown = true;
-        if (e.ctrlKey && e.altKey || isResizing) {
-            // console.log('pressing ctrl');
-            dragMouseDownCtrlAlt(e);
-        } else {
-            dragMouseDown(e);
-        }
-
-        if (isXPressed) elmnt.remove();
-    });
-
-    elmnt.addEventListener("touchstart", (e) => {
-        elmnt.classList.add("selected");
-        selectedElement.div = elmnt;
-        selectedElement.mediaElmnt = elmnt.children[0];
-        console.log('selected element div:', selectedElement.div);
-        console.log('selected element media:', selectedElement.mediaElmnt);
-        elmnt.style.zIndex = zIndex;
-        zIndex += 1;
-        if (zIndex > 99997) {
-            draggableDivs.forEach(e => {
-                e.style.zIndex = null;
-            });
-            zIndex = 1;
-        }
-        isMouseDown = true;
-        if (e.touches.lenght > 2) {
+        if (e.ctrlKey && e.altKey) {
             // console.log('pressing ctrl');
             dragMouseDownCtrlAlt(e);
         } else {
@@ -355,11 +505,6 @@ function dragElement(elmnt) {
         elmnt.classList.remove("selected");
     });
 
-    elmnt.addEventListener("touchend", () => {
-        isMouseDown = false;
-        elmnt.classList.remove("selected");
-    });
-
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
     function dragMouseDown(e) {
@@ -369,10 +514,8 @@ function dragElement(elmnt) {
         pos3 = e.clientX;
         pos4 = e.clientY;
         document.onmouseup = closeDragElement;
-        document.ontouchend = closeDragElement
         // call a function whenever the cursor moves:
         document.onmousemove = elementDrag;
-        document.ontouchmove = elementDrag;
     }
 
     function elementDrag(e) {
@@ -396,10 +539,8 @@ function dragElement(elmnt) {
         pos3 = e.clientX;
         pos4 = e.clientY;
         document.onmouseup = closeDragElement;
-        document.ontouchend = closeDragElement;
         // call a function whenever the cursor moves:
         document.onmousemove = resizeElement;
-        document.ontouchmove = resizeElement;
     }
 
     function resizeElement(e) {
@@ -422,8 +563,6 @@ function dragElement(elmnt) {
     function closeDragElement() {
         // stop moving when mouse button is released:
         document.onmouseup = null;
-        document.ontouchend = null;
         document.onmousemove = null;
-        document.ontouchmove = null;
     }
 }

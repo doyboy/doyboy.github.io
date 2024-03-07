@@ -2,19 +2,20 @@ body,
 html {
     height: 100%;
     margin: 0px;
+    overflow: hidden;
 }
 
 .all {
     display: flex;
     flex-direction: row;
-    background-color: lightcyan;
+    background-color: lightgrey;
     height: 100%;
 }
 
 .main {
     display: flex;
     width: 90%;
-    flex-direction: column;
+    /* flex-direction: column; */
     align-items: center;
 }
 
@@ -22,13 +23,24 @@ html {
     display: flex;
     flex-direction: column;
     width: 10%;
-    z-index: 999;
+    z-index: 99999;
+}
+
+#toggleSidebarButton {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    height: 8%;
+    width: 2%;
+    z-index: 99999;
 }
 
 .search-form {
     display: flex;
     flex-direction: column;
-    background-color: lightcoral;
+    /* background-color: lightcoral; */
     min-height: 10%;
     height: 20%;
 }
@@ -78,31 +90,36 @@ input {
     margin-bottom: 5%;
 }
 
-.mainGallery {
-    display: flex;
+#mainGallery {
+    position: absolute;
+    /* display: flex;
     flex-direction: column;
     align-items: center;
     background-color: lightgray;
     height: 100%;
     width: 100%;
-    justify-content: center;
+    justify-content: center; */
 }
 
-.mainGallery a {
+/* .mainGallery a {
     height: 5%;
     display: flex;
     align-items: center;
-}
+} */
 
 .drag {
     position: absolute;
-    border: 3px solid black;
-    /* max-width: 40%;
-    max-height: 40%; */
+    background-color: red;
 }
 
-/* .resize {
-    height: 50px;
-    width: 50px;
-    background-color: red;
-} */
+.drag img,
+.drag video {
+    border: 3px solid black;
+    width: 100%;
+}
+
+.selected img,
+.selected video {
+    border: 3px solid yellow;
+    width: 100%;
+}
