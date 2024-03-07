@@ -1,11 +1,8 @@
 const searchForm = document.querySelector('.search-form');
 const searchInput = document.querySelector('#search-input');
 const mainGallery = document.querySelector('.mainGallery');
-const sidebar = document.querySelector('.sidebar');
 const sidebarGallery = document.querySelector('.sidebarGallery');
 const sidebarGalleryArray = [];
-const toggleSidebarButton = document.querySelector('#toggleSidebarButton');
-const resizeButton = document.querySelector('#resizeButton')
 
 const filterCollapsible = document.querySelector('#filterCollapsible');
 const filterOptions = document.querySelector('.filterOptions');
@@ -17,25 +14,9 @@ const scoreLabel = document.querySelector('#scoreLabel');
 const randomLabel = document.querySelector('#randomLabel');
 const randomCheckbox = document.querySelector('#randomCheckbox');
 
-const draggableDivs = [];
-const draggableMedia = [];
-let draggableIndex = 0, zIndex = 1, isMouseDown = false, isXPressed = false, isResizing = false;
-
 const access_token = "e9b35900-8edc-440d-b9ae-382d67c8a556";
 
 let maxPageNum, randomPageNum, randomIndex;
-
-const selectedElement = {
-    div: '',
-    index: '',
-    mediaElmnt: ''
-};
-
-resizeButton.onclick = () => {
-    isResizing = !isResizing;
-    if (isResizing) resizeButton.style.background = 'darkgrey';
-    else resizeButton.style.background = null;
-};
 
 searchForm.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -70,28 +51,30 @@ filterCollapsible.addEventListener('click', () => {
     }
 });
 
-toggleSidebarButton.addEventListener('click', () => {
-    if (sidebar.style.display === 'none') {
-        sidebar.style.display = 'flex'
-        toggleSidebarButton.innerHTML = "<";
-    }
-    else {
-        sidebar.style.display = 'none';
-        toggleSidebarButton.innerHTML = ">";
-    }
-});
-
 function showImage(data) {
-    // mainGallery.innerHTML = '';
+    mainGallery.innerHTML = '';
     const sourceUrlContainer = document.createElement('a');
     const sourceUrl = `https://e621.net/posts/${data.posts[0].id}`;
     sourceUrlContainer.href = sourceUrl;
     sourceUrlContainer.target = "_blank";
     sourceUrlContainer.innerHTML = `Source: ${sourceUrl}`;
-    // mainGallery.appendChild(sourceUrlContainer);
+    mainGallery.appendChild(sourceUrlContainer);
     const fileUrl = data.posts[0].file.url;
     const fileExt = data.posts[0].file.ext;
-    createDraggable(fileUrl, fileExt, data);
+    if (fileExt === "webm") {
+        const newFileUrl = data.posts[0].sample.alternates.original.urls[1]
+        console.log(`fileUrl = ${newFileUrl}`);
+        const vid = document.createElement('video');
+        vid.src = newFileUrl;
+        vid.controls = true;
+        vid.autoplay = true;
+        vid.loop = true;
+        mainGallery.appendChild(vid);
+    } else {
+        const img = document.createElement('img');
+        img.src = fileUrl;
+        mainGallery.appendChild(img);
+    }
 }
 
 function sidebarGalleryFunctionality(data) {
@@ -106,7 +89,7 @@ function sidebarGalleryFunctionality(data) {
 }
 
 function fetchImages(url) {
-    // mainGallery.innerHTML = '';
+    mainGallery.innerHTML = '';
     fetch(url)
         .then((response) => response.json())
         .then((data) => {
@@ -118,7 +101,7 @@ function fetchImages(url) {
 }
 
 function fetchRaindrop() {
-    // mainGallery.innerHTML = '';
+    mainGallery.innerHTML = '';
     const allBookmarksUrl = `https://api.raindrop.io/rest/v1/raindrops/0?access_token=${access_token}`
     console.log("starter url", allBookmarksUrl);
     fetch(allBookmarksUrl)
@@ -146,7 +129,7 @@ function fetchRaindrop() {
 }
 
 function showRandomImage(data, dataType) {
-    // mainGallery.innerHTML = '';
+    mainGallery.innerHTML = '';
     const sourceUrlContainer = document.createElement('a');
     if (dataType == "e621") {
         let postId = data.link.split('/');
@@ -181,11 +164,12 @@ function raindropMainFunctionality(data, sourceUrlContainer) {
     sourceUrlContainer.href = sourceUrl;
     sourceUrlContainer.target = "_blank";
     sourceUrlContainer.innerHTML = `Source: ${sourceUrl}`;
-    // mainGallery.appendChild(sourceUrlContainer);
+    mainGallery.appendChild(sourceUrlContainer);
 
     const fileUrl = data.cover;
-    const fileExt = "";
-    createDraggable(fileUrl, fileExt, data);
+    const img = document.createElement('img');
+    img.src = fileUrl;
+    mainGallery.appendChild(img);
 
     const previewImg = document.createElement('img');
     previewImg.src = data.cover;
@@ -194,17 +178,18 @@ function raindropMainFunctionality(data, sourceUrlContainer) {
 }
 
 function raindropSidebarFunctionality(data, sourceUrlContainer) {
-    // mainGallery.innerHTML = '';
+    mainGallery.innerHTML = '';
     let sourceUrl = data.link;
 
     sourceUrlContainer.href = sourceUrl;
     sourceUrlContainer.target = "_blank";
     sourceUrlContainer.innerHTML = `Source: ${sourceUrl}`;
-    // mainGallery.appendChild(sourceUrlContainer);
+    mainGallery.appendChild(sourceUrlContainer);
 
     const fileUrl = data.cover;
-    const fileExt = "";
-    createDraggable(fileUrl, fileExt, data);
+    const img = document.createElement('img');
+    img.src = fileUrl;
+    mainGallery.appendChild(img);
 
     const previewImg = document.createElement('img');
     previewImg.src = data.cover;
@@ -214,216 +199,4 @@ function getRandomInt(min, max) {
     const minCeiled = Math.ceil(min);
     const maxFloored = Math.floor(max);
     return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
-}
-
-function createDraggable(url, ext, data) {
-    if (ext == "webm") {
-        const newFileUrl = data.posts[0].sample.alternates.original.urls[1]
-        const divWrapper = document.createElement('div');
-        const vid = document.createElement('video');
-        vid.src = newFileUrl;
-        vid.controls = true;
-        vid.controlsList = "nofullscreen";
-        vid.autoplay = true;
-        vid.loop = true;
-        divWrapper.classList.add("drag");
-        divWrapper.style.width = "40%";
-        divWrapper.style.zIndex = zIndex;
-        divWrapper.appendChild(vid);
-        draggableDivs.push(divWrapper);
-        draggableMedia.push(vid);
-        mainGallery.appendChild(divWrapper);
-        dragElement(draggableDivs[draggableIndex]);
-        draggableIndex += 1;
-    } else {
-        const divWrapper = document.createElement('div');
-        const img = document.createElement('img');
-        img.src = url;
-        divWrapper.classList.add("drag");
-        divWrapper.style.width = "40%";
-        divWrapper.style.zIndex = zIndex;
-        divWrapper.appendChild(img);
-        draggableDivs.push(divWrapper);
-        draggableMedia.push(img);
-        mainGallery.appendChild(divWrapper);
-        dragElement(draggableDivs[draggableIndex]);
-        draggableIndex += 1;
-    }
-}
-
-function fitDivToMedia(divElmnt, mediaElmnt) {
-    console.log('starting fit div function');
-    mediaElmnt.onload = () => {
-        console.log('media loaded');
-        console.log('offset width', mediaElmnt.offsetWidth);
-        divElmnt.style.width = mediaElmnt.offsetWidth + "px";
-        divElmnt.style.height = mediaElmnt.offsetHeight + "px";
-    }
-}
-
-document.addEventListener("keydown", (e) => {
-    if (e.key === "Delete") {
-        delete draggableDivs[draggableDivs.indexOf(selectedElement.div)];
-        selectedElement.div.remove();
-        console.log('draggableDivs after removing:', draggableDivs);
-    } else if (e.ctrlKey && e.key === "c") {
-        // console.log('copying image');
-        // copyImgToClipboard(selectedElement.mediaElmnt.src);
-    }
-});
-
-async function copyImgToClipboard(imgUrl) {
-    try {
-        const data = await fetch(imgUrl);
-        const blob = await data.blob();
-        await navigator.clipboard.write([
-            new ClipboardItem({
-                [blob.type]: blob,
-            }),
-        ]);
-        console.log('Image copied.');
-    } catch (err) {
-        console.error(err.name, err.message);
-    }
-}
-
-document.addEventListener("keydown", (e) => {
-    if (e.key === "x") {
-        isXPressed = true;
-    }
-});
-
-document.addEventListener("keyup", (e) => {
-    if (e.key === "x") {
-        isXPressed = false;
-    }
-});
-
-function dragElement(elmnt) {
-    elmnt.addEventListener("mousedown", (e) => {
-        elmnt.classList.add("selected");
-        selectedElement.div = elmnt;
-        selectedElement.mediaElmnt = elmnt.children[0];
-        console.log('selected element div:', selectedElement.div);
-        console.log('selected element media:', selectedElement.mediaElmnt);
-        elmnt.style.zIndex = zIndex;
-        zIndex += 1;
-        if (zIndex > 99997) {
-            draggableDivs.forEach(e => {
-                e.style.zIndex = null;
-            });
-            zIndex = 1;
-        }
-        isMouseDown = true;
-        if (e.ctrlKey && e.altKey || isResizing) {
-            // console.log('pressing ctrl');
-            dragMouseDownCtrlAlt(e);
-        } else {
-            dragMouseDown(e);
-        }
-
-        if (isXPressed) elmnt.remove();
-    });
-
-    elmnt.addEventListener("touchstart", (e) => {
-        elmnt.classList.add("selected");
-        selectedElement.div = elmnt;
-        selectedElement.mediaElmnt = elmnt.children[0];
-        console.log('selected element div:', selectedElement.div);
-        console.log('selected element media:', selectedElement.mediaElmnt);
-        elmnt.style.zIndex = zIndex;
-        zIndex += 1;
-        if (zIndex > 99997) {
-            draggableDivs.forEach(e => {
-                e.style.zIndex = null;
-            });
-            zIndex = 1;
-        }
-        isMouseDown = true;
-        if (e.touches.lenght > 2) {
-            // console.log('pressing ctrl');
-            dragMouseDownCtrlAlt(e);
-        } else {
-            dragMouseDown(e);
-        }
-
-        if (isXPressed) elmnt.remove();
-    });
-
-    elmnt.addEventListener("mouseup", () => {
-        isMouseDown = false;
-        elmnt.classList.remove("selected");
-    });
-
-    elmnt.addEventListener("touchend", () => {
-        isMouseDown = false;
-        elmnt.classList.remove("selected");
-    });
-
-    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
-    function dragMouseDown(e) {
-        e = e || window;
-        e.preventDefault();
-        // get the mouse cursor position at startup:
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        document.ontouchend = closeDragElement
-        // call a function whenever the cursor moves:
-        document.onmousemove = elementDrag;
-        document.ontouchmove = elementDrag;
-    }
-
-    function elementDrag(e) {
-        console.log('dragging');
-        e = e || window;
-        e.preventDefault();
-        // calculate the new cursor position:
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        // set the element's new position:
-        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-    }
-
-    function dragMouseDownCtrlAlt(e) {
-        e = e || window;
-        e.preventDefault();
-        // get the mouse cursor position at startup:
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        document.ontouchend = closeDragElement;
-        // call a function whenever the cursor moves:
-        document.onmousemove = resizeElement;
-        document.ontouchmove = resizeElement;
-    }
-
-    function resizeElement(e) {
-        console.log('resizing');
-        e = e || window;
-        e.preventDefault();
-        // calculate the new cursor position:
-        pos1 = pos3 - e.clientX;
-        console.log('pos1', -pos1);
-        pos3 = e.clientX;
-
-        console.log('element that is being resized:', elmnt);
-
-        // set the element's new size:
-        let widthNum = parseFloat(elmnt.style.width.split("%")[0]);
-
-        elmnt.style.width = (widthNum - (pos1 * widthNum / 200)) + "%";
-    }
-
-    function closeDragElement() {
-        // stop moving when mouse button is released:
-        document.onmouseup = null;
-        document.ontouchend = null;
-        document.onmousemove = null;
-        document.ontouchmove = null;
-    }
 }
