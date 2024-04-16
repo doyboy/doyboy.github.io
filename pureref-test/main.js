@@ -363,8 +363,8 @@ function dragElement(elmnt) {
 
     function dragMouseDown(e) {
         e = e || window;
-        e.preventDefault();
         if (e.type !== "touchmove") {
+            e.preventDefault();
             pos3 = e.clientX;
             pos4 = e.clientY;
         }
@@ -385,12 +385,14 @@ function dragElement(elmnt) {
 
     function elementDrag(e) {
         e = e || window;
-        e.preventDefault();
         if (e.type !== "touchmove") {
+            e.preventDefault();
             pos1 = pos3 - e.clientX;
             pos2 = pos4 - e.clientY;
             pos3 = e.clientX;
             pos4 = e.clientY;
+
+            console.log('pos1', pos1, 'pos3', pos3, 'pos2', pos2, 'pos4', pos4);
 
             elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
             elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
@@ -402,6 +404,8 @@ function dragElement(elmnt) {
             pos3 = e.touches[0].clientX;
             pos4 = e.touches[0].clientY;
 
+            console.log('pos1', pos1, 'pos3', pos3, 'pos2', pos2, 'pos4', pos4);
+
             elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
             elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
         }
@@ -409,8 +413,8 @@ function dragElement(elmnt) {
 
     function dragMouseDownCtrlAlt(e) {
         e = e || window;
-        e.preventDefault();
         if (e.type !== "touchmove") {
+            e.preventDefault();
             pos3 = e.clientX;
             pos4 = e.clientY;
         }
@@ -433,8 +437,8 @@ function dragElement(elmnt) {
     function resizeElement(e) {
         // console.log('resizing');
         e = e || window;
-        e.preventDefault();
         if (e.type !== "touchmove") {
+            e.preventDefault();
             pos1 = pos3 - e.clientX;
             console.log('pos1', -pos1);
             pos3 = e.clientX;
