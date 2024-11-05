@@ -21,8 +21,11 @@ let maxPageNum, randomPageNum, randomIndex;
 searchForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const searchTerm = searchInput.value;
-    if (searchTerm == "raindrop" || searchTerm == "random" || searchTerm == "pocket") {
-        fetchRaindrop();
+    if (searchTerm.toLowerCase() === "raindrop" || searchTerm.toLowerCase() === "random" || searchTerm.toLowerCase() === "pocket") {
+        fetchRaindrop('random');
+    }
+    else if (searchTerm.toLowerCase() === "irl") {
+        fetchRaindrop('irl');
     }
     else {
         let newSearchTerm = searchTerm.replace(/:\s*/g, "%3A");
@@ -100,9 +103,14 @@ function fetchImages(url) {
         .catch((error) => console.log(error));
 }
 
-function fetchRaindrop() {
+function fetchRaindrop(tag) {
     mainGallery.innerHTML = '';
-    const allBookmarksUrl = `https://api.raindrop.io/rest/v1/raindrops/0?access_token=${access_token}`
+    let allBookmarksUrl = '';
+    if (tag === 'random') {
+        allBookmarksUrl = `https://api.raindrop.io/rest/v1/raindrops/0?access_token=${access_token}&search=-%23irl`
+    } else if (tag === 'irl') {
+        allBookmarksUrl = `https://api.raindrop.io/rest/v1/raindrops/0?access_token=${access_token}&search=%23irl`
+    }
     console.log("starter url", allBookmarksUrl);
     fetch(allBookmarksUrl)
         .then((response) => response.json())
@@ -110,7 +118,13 @@ function fetchRaindrop() {
             maxPageNum = Math.floor(data.count / 25);
             randomPageNum = getRandomInt(0, maxPageNum);
 
-            const newBookmarksUrl = `https://api.raindrop.io/rest/v1/raindrops/0?access_token=${access_token}&page=${randomPageNum}`;
+            let newBookmarksUrl = '';
+
+            if (tag === 'random') {
+                newBookmarksUrl = `https://api.raindrop.io/rest/v1/raindrops/0?access_token=${access_token}&page=${randomPageNum}&search=-%23irl`;
+            } else if (tag === 'irl') {
+                newBookmarksUrl = `https://api.raindrop.io/rest/v1/raindrops/0?access_token=${access_token}&page=${randomPageNum}&search=%23irl`;
+            }
             console.log('new url', newBookmarksUrl);
 
             fetch(newBookmarksUrl)
