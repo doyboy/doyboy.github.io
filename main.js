@@ -18,6 +18,8 @@ const access_token = "e9b35900-8edc-440d-b9ae-382d67c8a556";
 
 const gdriveAuthButton = document.querySelector('#gdriveAuthButton');
 
+//comment
+
 let maxPageNum, randomPageNum, randomIndex;
 
 // Base URL for the screencap text files
