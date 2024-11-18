@@ -316,47 +316,77 @@ function getRandomInt(min, max) {
 
 // Function to fetch and display a random screencap
 async function fetchRandomScreencap() {
-    mainGallery.innerHTML = ''; // Clear the gallery
+    const folderId = '1iyQQfcYHErRrZIaXV_gM9yCc88I-PNdp'; // Folder ID
+    const accessToken = getStoredAccessToken(); // Ensure you have a valid access token
+    const mainGallery = document.querySelector('.mainGallery'); // Clear previous content
+    mainGallery.innerHTML = '';
+
+    if (!accessToken) {
+        console.error('No access token found. Please authenticate first.');
+        return;
+    }
 
     try {
-        // Estimate the number of files based on sequential naming
-        let fileIndex = 1; // Start with the first file
-        let maxFiles = 0;  // Keep track of the highest numbered file found
-
-        // Check for the existence of files sequentially
-        while (true) {
-            const response = await fetch(`${screencapBaseUrl}${fileIndex}.txt`);
-            if (response.ok) {
-                maxFiles = fileIndex; // Update the highest file index found
-                fileIndex++; // Check the next file
-            } else {
-                break; // Stop if the file does not exist
+        // Step 1: List all .txt files in the folder
+        const response = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType='text/plain'&fields=files(name,id)&key=YOUR_API_KEY`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
             }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to list files: ${response.statusText}`);
         }
 
-        if (maxFiles === 0) throw new Error('No screencap files found.');
+        const data = await response.json();
+        const files = data.files;
 
-        // Pick a random file index between 1 and maxFiles
-        const randomFileIndex = getRandomInt(1, maxFiles + 1);
-        const randomFileUrl = `${screencapBaseUrl}${randomFileIndex}.txt`;
+        if (!files || files.length === 0) {
+            throw new Error('No .txt files found in the folder.');
+        }
 
-        // Fetch the random file
-        const fileResponse = await fetch(randomFileUrl);
-        if (!fileResponse.ok) throw new Error(`Failed to fetch file: ${randomFileUrl}`);
-        const data = await fileResponse.text();
+        // Step 2: Extract numbers from file names
+        const fileNumbers = files.map(file => {
+            const match = file.name.match(/\d+/); // Extract number from file name
+            return match ? parseInt(match[0], 10) : null;
+        }).filter(num => num !== null); // Filter out invalid numbers
 
-        // Split lines to get URLs and pick a random URL
-        const urls = data.split('\n').filter(line => line.trim() !== '');
-        if (urls.length === 0) throw new Error(`No URLs found in file: ${randomFileIndex}.txt`);
-        const randomUrl = urls[getRandomInt(0, urls.length)];
+        const minNumber = Math.min(...fileNumbers);
+        const maxNumber = Math.max(...fileNumbers);
 
-        console.log(`Random Screencap URL: ${randomUrl}`);
+        if (fileNumbers.length === 0) {
+            throw new Error('No numbered files found.');
+        }
 
-        // Display the image
-        const img = document.createElement('img');
-        img.src = randomUrl;
-        mainGallery.appendChild(img);
-    } catch (err) {
-        console.error('Error fetching random screencap:', err.message);
+        // Step 3: Pick a random number within the range
+        const randomNumber = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+        const randomFile = files.find(file => file.name.includes(randomNumber.toString()));
+
+        if (!randomFile) {
+            throw new Error(`No file found for random number ${randomNumber}.`);
+        }
+
+        console.log(`Random File: ${randomFile.name} (ID: ${randomFile.id})`);
+
+        // Step 4: Fetch the content of the selected file
+        const fileContentResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${randomFile.id}?alt=media`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+
+        if (!fileContentResponse.ok) {
+            throw new Error(`Failed to fetch file content: ${fileContentResponse.statusText}`);
+        }
+
+        const fileContent = await fileContentResponse.text();
+
+        // Step 5: Display the content
+        const preElement = document.createElement('pre');
+        preElement.textContent = fileContent;
+        mainGallery.appendChild(preElement);
+
+    } catch (error) {
+        console.error('Error fetching random screencap:', error.message);
     }
 }
