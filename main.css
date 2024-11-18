@@ -37,11 +37,11 @@ html {
     height: 100%;
 }
 
-#gdriveAuthButton, #testGdriveButton {
+#gdriveAuthButton, #testGdriveButton, #gdriveCollapsible {
     min-height: 50px;
 }
 
-.filters {
+.filters, .gdriveAuth {
     display: flex;
     flex-direction: column;
     background-color: lightgreen;
@@ -51,7 +51,7 @@ html {
     min-height: 50px;
 }
 
-.filterOptions {
+.filterOptions, .gdriveOptions {
     display: none;
     overflow: hidden;
     overflow-y: overlay;

@@ -11,7 +11,7 @@
         <div class="sidebar">
             <form class="search-form">
                 <label for="search-input"></label>
-                <input type="text" id="search-input" value="random"/>
+                <input type="text" id="search-input" value="random" />
                 <button type="submit" id="searchButton">Search</button>
             </form>
             <div class="filters">
@@ -23,8 +23,13 @@
                     <input type="checkbox" class="checkbox" id="randomCheckbox">
                 </div>
             </div>
-            <button type="button" id="gdriveAuthButton">Authenticate Google Drive</button>
-            <button type="button" id="testGdriveButton">Test GDrive</button>
+            <div class="gdriveAuth">
+                <button type="button" id="gdriveCollapsible">Gdrive Options</button>
+                <div class="gdriveOptions">
+                    <button type="button" id="gdriveAuthButton">Authenticate Google Drive</button>
+                    <button type="button" id="testGdriveButton">Test GDrive</button>
+                </div>
+            </div>
             <div class="sidebarGallery"></div>
         </div>
         <div class="main">

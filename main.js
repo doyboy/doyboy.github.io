@@ -18,6 +18,8 @@ const access_token = "e9b35900-8edc-440d-b9ae-382d67c8a556";
 
 const gdriveAuthButton = document.querySelector('#gdriveAuthButton');
 const testGdriveButton = document.querySelector('#testGdriveButton');
+const gdriveCollapsible = document.querySelector('#gdriveCollapsible');
+const gdriveOptions = document.querySelector('.gdriveOptions');
 
 let maxPageNum, randomPageNum, randomIndex;
 
@@ -58,6 +60,18 @@ filterCollapsible.addEventListener('click', () => {
         filterContainer.style.height = "50px";
     } else {
         filterOptions.style.display = "block";
+        sidebarGallery.style.height = "60%";
+        filterContainer.style.height = "30%";
+    }
+});
+
+gdriveCollapsible.addEventListener('click', () => {
+    if (gdriveOptions.style.display === "block") {
+        gdriveOptions.style.display = "none";
+        sidebarGallery.style.height = "75%";
+        filterContainer.style.height = "50px";
+    } else {
+        gdriveOptions.style.display = "block";
         sidebarGallery.style.height = "60%";
         filterContainer.style.height = "30%";
     }
