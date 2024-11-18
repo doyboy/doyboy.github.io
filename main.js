@@ -327,50 +327,65 @@ async function fetchRandomScreencap() {
     }
 
     try {
-        const files = [];
-        let pageToken = null;
-
-        // Step 1: Fetch all files in the folder using pagination
-        do {
-            const response = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType='text/plain'&fields=nextPageToken,files(name,id)&pageToken=${pageToken || ''}&key=YOUR_API_KEY`, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to list files: ${response.statusText}`);
+        // Fetch the first file from the first page
+        const firstPageResponse = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType='text/plain'&fields=files(name,id)&orderBy=name asc&pageSize=1&key=YOUR_API_KEY`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
             }
+        });
 
-            const data = await response.json();
-            files.push(...data.files); // Accumulate files from the current page
-            pageToken = data.nextPageToken; // Update the token for the next page
-        } while (pageToken);
+        if (!firstPageResponse.ok) {
+            throw new Error(`Failed to fetch the first file: ${firstPageResponse.statusText}`);
+        }
 
-        if (files.length === 0) {
+        const firstPageData = await firstPageResponse.json();
+        if (!firstPageData.files || firstPageData.files.length === 0) {
             throw new Error('No .txt files found in the folder.');
         }
 
-        // Step 2: Extract numbers from file names to determine the range
-        const fileNumbers = files.map(file => {
-            const match = file.name.match(/\d+/); // Extract number from file name
-            return match ? parseInt(match[0], 10) : null;
-        }).filter(num => num !== null); // Filter out invalid numbers
+        // Extract the minimum number from the first file
+        const firstFile = firstPageData.files[0];
+        const minNumberMatch = firstFile.name.match(/\d+/);
+        const minNumber = minNumberMatch ? parseInt(minNumberMatch[0], 10) : null;
 
-        if (fileNumbers.length === 0) {
-            throw new Error('No numbered files found.');
+        if (minNumber === null) {
+            throw new Error('Could not determine the minimum file number.');
         }
 
-        const minNumber = Math.min(...fileNumbers);
-        const maxNumber = Math.max(...fileNumbers);
+        console.log(`Minimum File Number: ${minNumber}`);
 
-        console.log(`File Number Range: ${minNumber} to ${maxNumber}`);
+        // Fetch the last page of files to find the last file
+        const lastPageResponse = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType='text/plain'&fields=files(name,id)&orderBy=name desc&pageSize=100&key=YOUR_API_KEY`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
 
-        // Step 3: Pick a random number within the determined range
+        if (!lastPageResponse.ok) {
+            throw new Error(`Failed to fetch the last page of files: ${lastPageResponse.statusText}`);
+        }
+
+        const lastPageData = await lastPageResponse.json();
+        if (!lastPageData.files || lastPageData.files.length === 0) {
+            throw new Error('No .txt files found in the folder.');
+        }
+
+        // Extract the maximum number from the last file in the last page
+        const lastFile = lastPageData.files[0];
+        const maxNumberMatch = lastFile.name.match(/\d+/);
+        const maxNumber = maxNumberMatch ? parseInt(maxNumberMatch[0], 10) : null;
+
+        if (maxNumber === null) {
+            throw new Error('Could not determine the maximum file number.');
+        }
+
+        console.log(`Maximum File Number: ${maxNumber}`);
+
+        // Generate a random number within the range
         const randomNumber = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
 
-        // Step 4: Find the file corresponding to the random number
-        const randomFile = files.find(file => file.name.includes(randomNumber.toString()));
+        // Find the file corresponding to the random number
+        const randomFile = lastPageData.files.find(file => file.name.includes(randomNumber.toString()));
 
         if (!randomFile) {
             throw new Error(`No file found for random number ${randomNumber}.`);
@@ -378,7 +393,7 @@ async function fetchRandomScreencap() {
 
         console.log(`Random File: ${randomFile.name} (ID: ${randomFile.id})`);
 
-        // Step 5: Fetch the content of the selected file
+        // Fetch the content of the selected file
         const fileContentResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${randomFile.id}?alt=media`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
@@ -391,17 +406,17 @@ async function fetchRandomScreencap() {
 
         const fileContent = await fileContentResponse.text();
 
-        // Step 6: Split the file content into lines (URLs)
+        // Split the file content into lines (URLs)
         const urls = fileContent.split('\n').filter(line => line.trim() !== '');
         if (urls.length === 0) {
             throw new Error('No URLs found in the text file.');
         }
 
-        // Step 7: Pick a random URL from the list
+        // Pick a random URL from the list
         const randomUrl = urls[Math.floor(Math.random() * urls.length)];
         console.log(`Random Screencap URL: ${randomUrl}`);
 
-        // Step 8: Display the screencap in the main gallery and add it to the sidebar
+        // Display the screencap in the main gallery and add it to the sidebar
         screencapSidebarFunctionality(randomUrl);
 
     } catch (error) {
