@@ -63,28 +63,23 @@ filterCollapsible.addEventListener('click', () => {
     }
 });
 
-function isMobileDevice() {
-    return /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent);
-}
-
-gdriveAuthButton.addEventListener('click', () => {
+gdriveAuthButton.addEventListener('click', async () => {
     try {
+        // Step 1: Generate Google OAuth URL
         const clientId = '364567308332-kj7dij6p0h4t0eiqqa5bq1c2i0ade3l2.apps.googleusercontent.com'; // Replace with your actual Google Client ID
-        const redirectUri = 'https://doyboy.github.io/'; // Replace with your redirect URI
+        const redirectUri = 'https://doyboy.github.io/'; // Replace with your redirect URI (e.g., http://localhost)
         const scope = encodeURIComponent('https://www.googleapis.com/auth/drive.readonly');
         const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
 
-        if (isMobileDevice()) {
-            // Open popup on mobile
-            const authWindow = window.open(authUrl, '_blank', 'width=500,height=600');
+        // Open in a new tab or popup to avoid mobile browser restrictions
+        const authWindow = window.open(authUrl, '_blank', 'width=500,height=600');
 
-            if (!authWindow || authWindow.closed || typeof authWindow.closed === 'undefined') {
-                alert('Please enable popups for this site to authenticate with Google Drive.');
-            }
-        } else {
-            // Redirect on desktop
-            window.location.href = authUrl;
+        // Optionally: Show a message if the popup fails to open
+        if (!authWindow) {
+            alert('Please enable popups for this site to authenticate with Google Drive.');
         }
+        // Redirect user to Google OAuth URL
+        // window.location.href = authUrl;
     } catch (error) {
         console.error('Error initiating Google Drive authentication:', error);
     }
@@ -95,13 +90,15 @@ window.addEventListener('load', () => {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     if (hashParams.has('access_token')) {
         const accessToken = hashParams.get('access_token');
-        console.log('Google Drive Access Token (Redirect):', accessToken);
+        console.log('Google Drive Access Token:', accessToken);
 
-        // Store the access token in local storage
+        // Store the access token in local storage for future API calls
         localStorage.setItem('gdriveAccessToken', accessToken);
 
         // Optionally, clean up the URL
         window.history.replaceState({}, document.title, window.location.pathname);
+    } else {
+        console.log('No access token found. Please authenticate.');
     }
 });
 
