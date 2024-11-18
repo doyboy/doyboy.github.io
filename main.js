@@ -327,21 +327,27 @@ async function fetchRandomScreencap() {
     }
 
     try {
-        // Step 1: List all .txt files in the folder
-        const response = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType='text/plain'&fields=files(name,id)&key=YOUR_API_KEY`, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
+        const files = [];
+        let pageToken = null;
+
+        // Step 1: Fetch all files in the folder using pagination
+        do {
+            const response = await fetch(`https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType='text/plain'&fields=nextPageToken,files(name,id)&pageToken=${pageToken || ''}&key=YOUR_API_KEY`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to list files: ${response.statusText}`);
             }
-        });
 
-        if (!response.ok) {
-            throw new Error(`Failed to list files: ${response.statusText}`);
-        }
+            const data = await response.json();
+            files.push(...data.files); // Accumulate files from the current page
+            pageToken = data.nextPageToken; // Update the token for the next page
+        } while (pageToken);
 
-        const data = await response.json();
-        const files = data.files;
-
-        if (!files || files.length === 0) {
+        if (files.length === 0) {
             throw new Error('No .txt files found in the folder.');
         }
 
