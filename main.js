@@ -16,6 +16,8 @@ const randomCheckbox = document.querySelector('#randomCheckbox');
 
 const access_token = "e9b35900-8edc-440d-b9ae-382d67c8a556";
 
+const gdriveAuthButton = document.querySelector('#gdriveAuthButton');
+
 let maxPageNum, randomPageNum, randomIndex;
 
 // Base URL for the screencap text files
@@ -59,6 +61,41 @@ filterCollapsible.addEventListener('click', () => {
         filterContainer.style.height = "20%";
     }
 });
+
+gdriveAuthButton.addEventListener('click', async () => {
+    try {
+        // Step 1: Generate Google OAuth URL
+        const clientId = '364567308332-kj7dij6p0h4t0eiqqa5bq1c2i0ade3l2.apps.googleusercontent.com'; // Replace with your actual Google Client ID
+        const redirectUri = 'https://doyboy.github.io/'; // Replace with your redirect URI (e.g., http://localhost)
+        const scope = encodeURIComponent('https://www.googleapis.com/auth/drive.readonly');
+        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+
+        // Redirect user to Google OAuth URL
+        window.location.href = authUrl;
+    } catch (error) {
+        console.error('Error initiating Google Drive authentication:', error);
+    }
+});
+
+// Step 2: Store Access Token in Local Storage
+window.addEventListener('load', () => {
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    if (hashParams.has('access_token')) {
+        const accessToken = hashParams.get('access_token');
+        console.log('Google Drive Access Token:', accessToken);
+
+        // Store the access token in local storage
+        localStorage.setItem('gdriveAccessToken', accessToken);
+
+        // Optionally, redirect to clean up the URL
+        window.location.hash = '';
+    }
+});
+
+// Helper to Get Access Token from Local Storage
+function getStoredAccessToken() {
+    return localStorage.getItem('gdriveAccessToken');
+}
 
 function showImage(data) {
     mainGallery.innerHTML = '';

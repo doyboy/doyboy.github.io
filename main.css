@@ -37,6 +37,10 @@ html {
     height: 100%;
 }
 
+#gdriveAuthButton {
+    height: 50px;
+}
+
 .filters {
     display: flex;
     flex-direction: column;
