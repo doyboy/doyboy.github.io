@@ -391,13 +391,39 @@ async function fetchRandomScreencap() {
         const randomUrl = urls[Math.floor(Math.random() * urls.length)];
         console.log(`Random Screencap URL: ${randomUrl}`);
 
-        // Step 7: Display the screencap in the gallery
-        const img = document.createElement('img');
-        img.src = randomUrl;
-        img.alt = 'Random Screencap';
-        mainGallery.appendChild(img);
+        // Step 7: Display the screencap in the main gallery and add it to the sidebar
+        screencapSidebarFunctionality(randomUrl);
 
     } catch (error) {
         console.error('Error fetching random screencap:', error.message);
     }
+}
+
+
+function screencapSidebarFunctionality(screencapUrl) {
+    const mainGallery = document.querySelector('.mainGallery');
+    const sidebarGallery = document.querySelector('.sidebarGallery');
+
+    // Step 1: Clear the main gallery and display the screencap
+    mainGallery.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = screencapUrl;
+    img.alt = 'Random Screencap';
+    mainGallery.appendChild(img);
+
+    // Step 2: Add a preview image to the sidebar
+    const previewImg = document.createElement('img');
+    previewImg.src = screencapUrl;
+    previewImg.alt = 'Screencap Preview';
+    sidebarGallery.appendChild(previewImg);
+
+    // Step 3: Add click functionality to the sidebar preview
+    previewImg.addEventListener('click', () => {
+        // Display the clicked preview in the main gallery
+        mainGallery.innerHTML = ''; // Clear the main gallery
+        const newImg = document.createElement('img');
+        newImg.src = screencapUrl;
+        newImg.alt = 'Screencap';
+        mainGallery.appendChild(newImg);
+    });
 }
