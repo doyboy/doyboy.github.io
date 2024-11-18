@@ -357,12 +357,34 @@ async function fetchRandomScreencap() {
             console.log('Using cached files...');
         }
 
-        // Step 2: Pick a random file from the cached list
-        const randomFile = cachedFiles[Math.floor(Math.random() * cachedFiles.length)];
+        // Step 2: Extract numbers from file names to determine the range
+        const fileNumbers = cachedFiles.map(file => {
+            const match = file.name.match(/\d+/); // Extract number from file name
+            return match ? parseInt(match[0], 10) : null;
+        }).filter(num => num !== null); // Filter out invalid numbers
+
+        if (fileNumbers.length === 0) {
+            throw new Error('No numbered files found.');
+        }
+
+        const minNumber = Math.min(...fileNumbers);
+        const maxNumber = Math.max(...fileNumbers);
+
+        console.log(`File Number Range: ${minNumber} to ${maxNumber}`);
+
+        // Step 3: Pick a random number within the determined range
+        const randomNumber = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+
+        // Step 4: Find the file corresponding to the random number
+        const randomFile = cachedFiles.find(file => file.name.includes(randomNumber.toString()));
+
+        if (!randomFile) {
+            throw new Error(`No file found for random number ${randomNumber}.`);
+        }
 
         console.log(`Random File: ${randomFile.name} (ID: ${randomFile.id})`);
 
-        // Step 3: Fetch the content of the selected file
+        // Step 5: Fetch the content of the selected file
         const fileContentResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${randomFile.id}?alt=media`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
@@ -375,36 +397,14 @@ async function fetchRandomScreencap() {
 
         const fileContent = await fileContentResponse.text();
 
-        // Step 4: Extract the first and last lines
-        const lines = fileContent.split('\n').filter(line => line.trim() !== '');
-        if (lines.length === 0) {
+        // Step 6: Split the file content into lines (URLs)
+        const urls = fileContent.split('\n').filter(line => line.trim() !== '');
+        if (urls.length === 0) {
             throw new Error('No URLs found in the text file.');
         }
 
-        const firstLine = lines[0];
-        const lastLine = lines[lines.length - 1];
-
-        // Step 5: Extract the numbers from the URLs
-        const extractNumber = (line) => {
-            const match = line.match(/animationscreencaps\.com-(\d+)\.jpg\?ssl=1/);
-            return match ? parseInt(match[1], 10) : null;
-        };
-
-        const minNumber = extractNumber(firstLine);
-        const maxNumber = extractNumber(lastLine);
-
-        if (minNumber === null || maxNumber === null) {
-            throw new Error('Could not extract numbers from the URLs.');
-        }
-
-        console.log(`Range extracted: ${minNumber} to ${maxNumber}`);
-
-        // Step 6: Generate a random number within the range
-        const randomNumber = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
-
-        // Step 7: Construct the random URL
-        const baseUrl = 'https://animationscreencaps.com-';
-        const randomUrl = `${baseUrl}${randomNumber}.jpg?ssl=1`;
+        // Step 7: Pick a random URL from the list
+        const randomUrl = urls[Math.floor(Math.random() * urls.length)];
         console.log(`Random Screencap URL: ${randomUrl}`);
 
         // Step 8: Display the screencap in the main gallery and add it to the sidebar
