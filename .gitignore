@@ -1,4 +1,4 @@
-*.txt
 node_modules/
 animation-screencaps-scrape/node_modules/
 auth.js
+screencap-urls
