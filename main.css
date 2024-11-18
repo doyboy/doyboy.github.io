@@ -28,7 +28,7 @@ html {
     display: flex;
     flex-direction: column;
     background-color: lightcoral;
-    min-height: 10%;
+    min-height: 150px;
     height: 20%;
 }
 
@@ -38,7 +38,7 @@ html {
 }
 
 #gdriveAuthButton, #testGdriveButton {
-    height: 50px;
+    min-height: 50px;
 }
 
 .filters {
@@ -46,6 +46,7 @@ html {
     flex-direction: column;
     background-color: lightgreen;
     height: 5%;
+    min-height: 50px;
 }
 
 #filterCollapsible {

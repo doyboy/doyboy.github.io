@@ -41,7 +41,7 @@ searchForm.addEventListener('submit', (event) => {
         newSearchTerm = newSearchTerm.concat(`+score:>${scoreSlider.value}`);
         if (randomCheckbox.checked) newSearchTerm = newSearchTerm.concat(`+order:random`)
         newSearchTerm = newSearchTerm.replace(/ /g, "+");
-        const searchUrl = `REDACTED_URL`;
+        const searchUrl = `https://e621.net/posts.json?limit=1&tags=-cub+-loli+-shota+-young+-female+-feral+-intersex+-diaper+-scat+-watersports+-urine+-feces+-gore+-syuro+-plushie+-kiske_7key+-loreking+-scruffythedeer+${newSearchTerm}`;
         console.log(`searchUrl = ${searchUrl}`);
         fetchImages(searchUrl);
     }
@@ -133,7 +133,7 @@ testGdriveButton.addEventListener('click', async () => {
 function showImage(data) {
     mainGallery.innerHTML = '';
     const sourceUrlContainer = document.createElement('a');
-    const sourceUrl = `https://REDACTED.net/posts/${data.posts[0].id}`;
+    const sourceUrl = `https://e621.net/posts/${data.posts[0].id}`;
     sourceUrlContainer.href = sourceUrl;
     sourceUrlContainer.target = "_blank";
     sourceUrlContainer.innerHTML = `Source: ${sourceUrl}`;
@@ -172,7 +172,7 @@ function fetchImages(url) {
     fetch(url)
         .then((response) => response.json())
         .then((data) => {
-            console.log('REDACTED data:', data);
+            console.log('e621 data:', data);
             showImage(data);
             sidebarGalleryFunctionality(data);
         })
@@ -221,17 +221,17 @@ function fetchRaindrop(tag) {
 function showRandomImage(data, dataType) {
     mainGallery.innerHTML = '';
     const sourceUrlContainer = document.createElement('a');
-    if (dataType == "REDACTED") {
+    if (dataType == "e621") {
         let postId = data.link.split('/');
         postId = postId[postId.length - 1].split('?')[0];
         postId = parseInt(postId) + 1;
 
-        let searchUrl = `https://REDACTED.net/posts.json?limit=1&page=b${postId}`;
+        let searchUrl = `https://e621.net/posts.json?limit=1&page=b${postId}`;
         console.log('searchUrl', searchUrl);
         fetch(searchUrl)
             .then((response) => response.json())
             .then((data) => {
-                console.log('REDACTED data:', data);
+                console.log('e621 data:', data);
                 showImage(data);
                 sidebarGalleryFunctionality(data);
             })
