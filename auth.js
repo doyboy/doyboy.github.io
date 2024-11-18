@@ -5,7 +5,7 @@ const SCOPES = ['https://www.googleapis.com/auth/drive.readonly'];
 async function getAccessToken() {
     const auth = new google.auth.OAuth2(
         'clientID',
-        'secrett',
+        'secret',
         'https://doyboy.github.io/'
     );
 
