@@ -45,12 +45,10 @@ html {
     display: flex;
     flex-direction: column;
     background-color: lightgreen;
-    height: 5%;
-    min-height: 50px;
 }
 
 #filterCollapsible {
-    height: 50px;
+    min-height: 50px;
 }
 
 .filterOptions {

@@ -55,11 +55,11 @@ filterCollapsible.addEventListener('click', () => {
     if (filterOptions.style.display === "block") {
         filterOptions.style.display = "none";
         sidebarGallery.style.height = "75%";
-        filterContainer.style.height = "5%";
+        filterContainer.style.height = "50px";
     } else {
         filterOptions.style.display = "block";
         sidebarGallery.style.height = "60%";
-        filterContainer.style.height = "20%";
+        filterContainer.style.height = "30%";
     }
 });
 
