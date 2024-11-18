@@ -18,14 +18,20 @@ const access_token = "e9b35900-8edc-440d-b9ae-382d67c8a556";
 
 let maxPageNum, randomPageNum, randomIndex;
 
+// Base URL for the screencap text files
+const screencapBaseUrl = 'animation-screencaps-scrape/screencap-urls/';
+
 searchForm.addEventListener('submit', (event) => {
     event.preventDefault();
-    const searchTerm = searchInput.value;
-    if (searchTerm.toLowerCase() === "raindrop" || searchTerm.toLowerCase() === "random" || searchTerm.toLowerCase() === "pocket") {
+    const searchTerm = searchInput.value.toLowerCase();
+    if (searchTerm === "raindrop" || searchTerm === "random" || searchTerm === "pocket") {
         fetchRaindrop('random');
     }
-    else if (searchTerm.toLowerCase() === "irl") {
+    else if (searchTerm === "irl") {
         fetchRaindrop('irl');
+    }
+    else if (searchTerm === "screencap" || searchTerm === "screencaps")  {
+        fetchRandomScreencap();
     }
     else {
         let newSearchTerm = searchTerm.replace(/:\s*/g, "%3A");
@@ -213,4 +219,51 @@ function getRandomInt(min, max) {
     const minCeiled = Math.ceil(min);
     const maxFloored = Math.floor(max);
     return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+}
+
+// Function to fetch and display a random screencap
+async function fetchRandomScreencap() {
+    mainGallery.innerHTML = ''; // Clear the gallery
+
+    try {
+        // Estimate the number of files based on sequential naming
+        let fileIndex = 1; // Start with the first file
+        let maxFiles = 0;  // Keep track of the highest numbered file found
+
+        // Check for the existence of files sequentially
+        while (true) {
+            const response = await fetch(`${screencapBaseUrl}${fileIndex}.txt`);
+            if (response.ok) {
+                maxFiles = fileIndex; // Update the highest file index found
+                fileIndex++; // Check the next file
+            } else {
+                break; // Stop if the file does not exist
+            }
+        }
+
+        if (maxFiles === 0) throw new Error('No screencap files found.');
+
+        // Pick a random file index between 1 and maxFiles
+        const randomFileIndex = getRandomInt(1, maxFiles + 1);
+        const randomFileUrl = `${screencapBaseUrl}${randomFileIndex}.txt`;
+
+        // Fetch the random file
+        const fileResponse = await fetch(randomFileUrl);
+        if (!fileResponse.ok) throw new Error(`Failed to fetch file: ${randomFileUrl}`);
+        const data = await fileResponse.text();
+
+        // Split lines to get URLs and pick a random URL
+        const urls = data.split('\n').filter(line => line.trim() !== '');
+        if (urls.length === 0) throw new Error(`No URLs found in file: ${randomFileIndex}.txt`);
+        const randomUrl = urls[getRandomInt(0, urls.length)];
+
+        console.log(`Random Screencap URL: ${randomUrl}`);
+
+        // Display the image
+        const img = document.createElement('img');
+        img.src = randomUrl;
+        mainGallery.appendChild(img);
+    } catch (err) {
+        console.error('Error fetching random screencap:', err.message);
+    }
 }
