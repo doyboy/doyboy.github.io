@@ -17,8 +17,7 @@ const randomCheckbox = document.querySelector('#randomCheckbox');
 const access_token = "e9b35900-8edc-440d-b9ae-382d67c8a556";
 
 const gdriveAuthButton = document.querySelector('#gdriveAuthButton');
-
-//comment
+const testGdriveButton = document.querySelector('#testGdriveButton');
 
 let maxPageNum, randomPageNum, randomIndex;
 
@@ -42,7 +41,7 @@ searchForm.addEventListener('submit', (event) => {
         newSearchTerm = newSearchTerm.concat(`+score:>${scoreSlider.value}`);
         if (randomCheckbox.checked) newSearchTerm = newSearchTerm.concat(`+order:random`)
         newSearchTerm = newSearchTerm.replace(/ /g, "+");
-        const searchUrl = `https://e621.net/posts.json?limit=1&tags=-cub+-loli+-shota+-young+-female+-feral+-intersex+-diaper+-scat+-watersports+-urine+-feces+-gore+-syuro+-plushie+-kiske_7key+-loreking+-scruffythedeer+${newSearchTerm}`;
+        const searchUrl = `REDACTED_URL`;
         console.log(`searchUrl = ${searchUrl}`);
         fetchImages(searchUrl);
     }
@@ -99,10 +98,42 @@ function getStoredAccessToken() {
     return localStorage.getItem('gdriveAccessToken');
 }
 
+testGdriveButton.addEventListener('click', async () => {
+    const accessToken = getStoredAccessToken(); // Retrieve the access token from local storage
+    if (!accessToken) {
+        console.error('No access token found. Please authenticate with Google Drive first.');
+        return;
+    }
+
+    try {
+        // Fetch files from Google Drive root directory
+        const response = await fetch('https://www.googleapis.com/drive/v3/files?q=\'root\' in parents', {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch Google Drive files: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('Google Drive Root Files:', data.files);
+
+        // Log each file's name and ID
+        data.files.forEach(file => {
+            console.log(`File: ${file.name} (ID: ${file.id})`);
+        });
+
+    } catch (error) {
+        console.error('Error accessing Google Drive:', error.message);
+    }
+});
+
 function showImage(data) {
     mainGallery.innerHTML = '';
     const sourceUrlContainer = document.createElement('a');
-    const sourceUrl = `https://e621.net/posts/${data.posts[0].id}`;
+    const sourceUrl = `https://REDACTED.net/posts/${data.posts[0].id}`;
     sourceUrlContainer.href = sourceUrl;
     sourceUrlContainer.target = "_blank";
     sourceUrlContainer.innerHTML = `Source: ${sourceUrl}`;
@@ -141,7 +172,7 @@ function fetchImages(url) {
     fetch(url)
         .then((response) => response.json())
         .then((data) => {
-            console.log('e621 data:', data);
+            console.log('REDACTED data:', data);
             showImage(data);
             sidebarGalleryFunctionality(data);
         })
@@ -190,17 +221,17 @@ function fetchRaindrop(tag) {
 function showRandomImage(data, dataType) {
     mainGallery.innerHTML = '';
     const sourceUrlContainer = document.createElement('a');
-    if (dataType == "e621") {
+    if (dataType == "REDACTED") {
         let postId = data.link.split('/');
         postId = postId[postId.length - 1].split('?')[0];
         postId = parseInt(postId) + 1;
 
-        let searchUrl = `https://e621.net/posts.json?limit=1&page=b${postId}`;
+        let searchUrl = `https://REDACTED.net/posts.json?limit=1&page=b${postId}`;
         console.log('searchUrl', searchUrl);
         fetch(searchUrl)
             .then((response) => response.json())
             .then((data) => {
-                console.log('e621 data:', data);
+                console.log('REDACTED data:', data);
                 showImage(data);
                 sidebarGalleryFunctionality(data);
             })
