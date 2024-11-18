@@ -71,6 +71,14 @@ gdriveAuthButton.addEventListener('click', async () => {
         const scope = encodeURIComponent('https://www.googleapis.com/auth/drive.readonly');
         const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
 
+        // Open in a new tab or popup to avoid mobile browser restrictions
+        const authWindow = window.open(authUrl, '_blank', 'width=500,height=600');
+
+        // Optionally: Show a message if the popup fails to open
+        if (!authWindow) {
+            alert('Please enable popups for this site to authenticate with Google Drive.');
+        }
+
         // Redirect user to Google OAuth URL
         window.location.href = authUrl;
     } catch (error) {
@@ -85,11 +93,13 @@ window.addEventListener('load', () => {
         const accessToken = hashParams.get('access_token');
         console.log('Google Drive Access Token:', accessToken);
 
-        // Store the access token in local storage
+        // Store the access token in local storage for future API calls
         localStorage.setItem('gdriveAccessToken', accessToken);
 
-        // Optionally, redirect to clean up the URL
-        window.location.hash = '';
+        // Optionally, clean up the URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else {
+        console.log('No access token found. Please authenticate.');
     }
 });
 
