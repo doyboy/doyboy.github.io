@@ -345,21 +345,25 @@ async function fetchRandomScreencap() {
             throw new Error('No .txt files found in the folder.');
         }
 
-        // Step 2: Extract numbers from file names
+        // Step 2: Extract numbers from file names to determine the range
         const fileNumbers = files.map(file => {
             const match = file.name.match(/\d+/); // Extract number from file name
             return match ? parseInt(match[0], 10) : null;
         }).filter(num => num !== null); // Filter out invalid numbers
 
-        const minNumber = Math.min(...fileNumbers);
-        const maxNumber = Math.max(...fileNumbers);
-
         if (fileNumbers.length === 0) {
             throw new Error('No numbered files found.');
         }
 
-        // Step 3: Pick a random number within the range
+        const minNumber = Math.min(...fileNumbers);
+        const maxNumber = Math.max(...fileNumbers);
+
+        console.log(`File Number Range: ${minNumber} to ${maxNumber}`);
+
+        // Step 3: Pick a random number within the determined range
         const randomNumber = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+
+        // Step 4: Find the file corresponding to the random number
         const randomFile = files.find(file => file.name.includes(randomNumber.toString()));
 
         if (!randomFile) {
@@ -368,7 +372,7 @@ async function fetchRandomScreencap() {
 
         console.log(`Random File: ${randomFile.name} (ID: ${randomFile.id})`);
 
-        // Step 4: Fetch the content of the selected file
+        // Step 5: Fetch the content of the selected file
         const fileContentResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${randomFile.id}?alt=media`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
@@ -381,24 +385,23 @@ async function fetchRandomScreencap() {
 
         const fileContent = await fileContentResponse.text();
 
-        // Step 5: Split the file content into lines (URLs)
+        // Step 6: Split the file content into lines (URLs)
         const urls = fileContent.split('\n').filter(line => line.trim() !== '');
         if (urls.length === 0) {
             throw new Error('No URLs found in the text file.');
         }
 
-        // Step 6: Pick a random URL from the list
+        // Step 7: Pick a random URL from the list
         const randomUrl = urls[Math.floor(Math.random() * urls.length)];
         console.log(`Random Screencap URL: ${randomUrl}`);
 
-        // Step 7: Display the screencap in the main gallery and add it to the sidebar
+        // Step 8: Display the screencap in the main gallery and add it to the sidebar
         screencapSidebarFunctionality(randomUrl);
 
     } catch (error) {
         console.error('Error fetching random screencap:', error.message);
     }
 }
-
 
 function screencapSidebarFunctionality(screencapUrl) {
     const mainGallery = document.querySelector('.mainGallery');
