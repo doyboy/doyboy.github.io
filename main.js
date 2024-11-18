@@ -381,10 +381,21 @@ async function fetchRandomScreencap() {
 
         const fileContent = await fileContentResponse.text();
 
-        // Step 5: Display the content
-        const preElement = document.createElement('pre');
-        preElement.textContent = fileContent;
-        mainGallery.appendChild(preElement);
+        // Step 5: Split the file content into lines (URLs)
+        const urls = fileContent.split('\n').filter(line => line.trim() !== '');
+        if (urls.length === 0) {
+            throw new Error('No URLs found in the text file.');
+        }
+
+        // Step 6: Pick a random URL from the list
+        const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+        console.log(`Random Screencap URL: ${randomUrl}`);
+
+        // Step 7: Display the screencap in the gallery
+        const img = document.createElement('img');
+        img.src = randomUrl;
+        img.alt = 'Random Screencap';
+        mainGallery.appendChild(img);
 
     } catch (error) {
         console.error('Error fetching random screencap:', error.message);
